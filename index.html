@@ -22,36 +22,182 @@
   <script src="./過往比賽.js"></script>  
   <script src="functions.js"></script>
 
-  <div style="margin-left:30px; margin-right:30px" id="header">
-    <img src="%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8logo.jpg"></img>
-    <button id="帳號管理" style="font-size:20px;float: right; margin-top: 50px" onclick="帳號管理click()">帳號管理</button>
-    <br>
-    <button id="登出入按鈕" style="font-size:20px;" onclick="登出入按鈕click()">登入</button> <a id="登出入訊息">請登入進行管理比賽</a>
+<!--  主頁面-->
+  <div id="NTHU_header">
+    <div style="font-size:20px;margin-left:30px; margin-right:30px" id="header">
+      <button style="font-size:20px" id="帳號管理"  onclick="帳號管理click()">帳號管理</button>
+      <button style="font-size:20px" id="院所系管理按鈕" onclick="院所系管理按鈕click()">院所系管理</button> 
+      <button style="font-size:20px" id="登出入按鈕"  onclick="登出入按鈕click()">登入</button> 
+      <a id="登出入訊息">請登入進行管理比賽</a>
+      <hr>
+      <img src='%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8logo.jpg'>
+
+    </div>
   </div>
-  
-  <div style="height: 50px"></div>
-  
-  <div style="margin-left:30px; margin-right:30px" id="現行比賽">
-    <a style="font-size:30px; font-weight:bold;"><i style="color: dimgray" class="fa fa-trophy"></i> 現行比賽</a>
-    <button id="新增比賽按鈕" style="margin-left:20px; font-size:20px; height:40px; vertical-align:top" onclick="新增比賽按鈕click()">新增比賽</button>
-      <div style="height: 10px"></div>
-    <div id="現行比賽表格"></div>
+
+  <div id="mainPage">
+    <div style="height: 30px"></div>
+
+    <div style="margin-left:30px; margin-right:30px" id="現行比賽">
+      <a style="font-size:30px; font-weight:bold;"><i style="color: dimgray" class="fa fa-trophy"></i> 現行比賽</a>
+      <button id="新增比賽按鈕" style="margin-left:20px; font-size:20px; height:40px; vertical-align:top" onclick="新增比賽按鈕click()">新增比賽</button>
+        <div style="height: 10px"></div>
+      <div id="現行比賽表格"></div>
+    </div>
+
+    <div style="height: 50px"></div>
+
+    <div style="margin-left:30px; margin-right:30px" id="過往比賽">  
+      <h1><i style="color: dimgray" class="fa fa-history"></i> 過往比賽 </h1>
+      <div id="過往比賽表格"></div>
+    </div>
   </div>
-  
-  <div style="height: 50px"></div>
-  
-  <div style="margin-left:30px; margin-right:30px" id="過往比賽">  
-    <h1><i style="color: dimgray" class="fa fa-history"></i> 過往比賽 </h1>
-    <div id="過往比賽表格"></div>
+<!--  主頁面結束-->
+ 
+<!--新增比賽表格-->
+  <div id="新增比賽表格Div" style="margin-left:30px">
+    <h1 id="新增比賽表格header"><i style="color: dimgray" class="fa fa-plus"></i> 新增比賽</h1>
+    <button style="font-size:20px" id="比賽資訊" onclick="比賽資訊click()">比賽資訊</button>
+    <button style="font-size:20px" id="報名名單" onclick="報名名單click()">報名名單</button>  
+    <button style="font-size:20px" id="比賽結果" onclick="比賽結果click()">比賽結果</button>  
+    <hr>
+
+    <div id="比賽資訊Div" style="margin-left:30px">   
+      <p>
+        <label class="新增比賽表格項目標題" id="比賽編號標題">比賽編號:</label>
+        <label class="新增比賽表格項目內容" id="比賽編號內容">1</label>
+      </p>
+      <p>
+        <label class="新增比賽表格項目標題" style="vertical-align:top" id="比賽名稱標題">比賽名稱:</label>
+        <textarea class="新增比賽表格項目內容" id="比賽名稱內容" cols="74" rows="1"></textarea>
+      </p>      
+
+      <p>      
+        <label class="新增比賽表格項目標題" style="vertical-align:top">比賽說明: </label>    
+        <textarea class="新增比賽表格項目內容" id="比賽說明內容" cols="74" rows="5"></textarea>
+      </p>
+
+      <p>
+        <label class="新增比賽表格項目標題">比賽日期:</label>
+        <input id="比賽日期" class="新增比賽表格項目內容" type="date"> 
+
+        <label class="新增比賽表格項目標題" style="margin-left: 90px" >開始時間:</label>
+        <input id="開始時間" class="新增比賽表格項目內容" type="time" style="margin-left:0px" >     
+        <label class="新增比賽表格項目標題" style="margin-left: 106px" >結束時間:</label>
+        <input id="開始時間" class="新增比賽表格項目內容" type="time" style="margin-left:0px" >    
+      </p>
+
+      <p>
+        <label class="新增比賽表格項目標題">參賽隊數:</label>
+        <input id="參賽隊數" class="新增比賽表格項目內容" style="width:200px" > 
+        <label class="新增比賽表格項目標題">隊</label>      
+      </p>        
+
+      <p>
+        <label class="新增比賽表格項目標題">比賽種類:</label><br>
+
+        <input type="radio" id="個人三鐵" checked="checked" name="比賽種類">
+        <label class="新增比賽表格Raido">個人三鐵(個人做三項)</label>
+
+        <input type="radio" id="三人三鐵" name="比賽種類" style="margin-left:140px" >
+        <label class="新增比賽表格Raido">三人三鐵(每人做三項)</label>
+
+        <input type="radio" id="三人綜合" name="比賽種類" style="margin-left:92px">
+        <label class="新增比賽表格Raido">三人綜合(一人做一項)</label> <br>
+
+        <input type="radio" id="三人跑步" name="比賽種類">
+        <label class="新增比賽表格Raido">三人跑步</label>
+
+        <input type="radio" id="三人飛輪" name="比賽種類" style="margin-left:253px">
+        <label class="新增比賽表格Raido">三人飛輪</label>
+
+        <input type="radio" id="三人划船" name="比賽種類" style="margin-left:206px">
+        <label class="新增比賽表格Raido">三人划船</label> <br>      
+
+        <input type="radio" id="個人跑步" name="比賽種類">
+        <label class="新增比賽表格Raido">個人跑步</label>
+
+        <input type="radio" id="個人飛輪" name="比賽種類" style="margin-left:253px">
+        <label class="新增比賽表格Raido">個人飛輪</label>
+
+        <input type="radio" id="個人划船" name="比賽種類" style="margin-left:206px">
+        <label class="新增比賽表格Raido">個人划船</label>                                                       
+      </p>
+      <br>
+
+      <p>
+        <label class="新增比賽表格項目標題">比賽設定:</label>
+
+        <label class="新增比賽表格項目標題" style="margin-left:20px" >跑步距離:</label>      
+        <input id="跑步距離" class="新增比賽表格項目內容" style="margin-left:0px; width:110px" > 
+        <label class="新增比賽表格項目標題">公里</label>   
+
+        <label class="新增比賽表格項目標題" style="margin-left:50px" >飛輪距離:</label>      
+        <input id="飛輪距離" class="新增比賽表格項目內容" style="margin-left:0px; width:150px" > 
+        <label class="新增比賽表格項目標題">公里</label>              
+
+        <label class="新增比賽表格項目標題" style="margin-left:56px" >划船距離:</label>      
+        <input id="划船距離" class="新增比賽表格項目內容" style="margin-left:0px; width:150px" > 
+        <label class="新增比賽表格項目標題">公尺</label>             
+      </p>         
+
+
+      <p>
+        <button class="新增比賽表格項目標題" onclick="addConfirm()">儲存</button>     
+        <label></label>
+      </p>
+    </div> 
+    
+    <div id="報名名單Div" style="margin-left:30px">  
+      <p>
+        <label class="新增比賽表格項目標題" id="隊伍title" style="margin-right:50px" >隊伍</label>
+        <label class="新增比賽表格項目標題" id="院所系title" style="margin-right:200px">院所系</label>
+        <label class="新增比賽表格項目標題" id="跑步者title" style="margin-right:200px">跑步</label>
+        <label class="新增比賽表格項目標題" id="飛輪者title" style="margin-right:200px">飛輪</label>
+        <label class="新增比賽表格項目標題" id="划船者title" style="margin-right:200px">划船</label>           
+      </p>
+      <p>
+        <label class="新增比賽表格項目內容" style="margin-right:50px" >1</label>                
+        <select class="新增比賽表格項目內容" name="院所系" id="院所系">
+          <option value="電機">電機</option>
+          <option value="電子">電子</option>
+          <option value="物理">物理</option>
+          <option value="化學">化學</option>
+        </select>  
+         
+        <select class="新增比賽表格項目內容" name="院所系1" id="院所系1">
+          <option value="電機">電機</option>
+          <option value="電子">電子</option>
+          <option value="物理">物理</option>
+          <option value="化學">化學</option>
+        </select>  
+      </p>          
+    </div>
+    
   </div>
+<!--新增比賽表格結束-->
   
   <style>
-    #grid {
-/*      padding: .6em 1.3em .6em .4em;*/
-/*      font-size: 20px;*/
+    .新增比賽表格項目標題 {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
     }
+    .新增比賽表格項目內容 {
+      font-size: 20px;
+      margin-left: 20px;
+      margin-top: 0px;
+    } 
+    .新增比賽表格Raido {
+      font-size: 20px;
+      margin-right: 50px;
+      margin-top: 0px;
+    }     
   </style>
+   
+  <script src="./現行比賽.js"></script>
+  <script src="./過往比賽.js"></script>  
+  <script src="functions.js"></script>   
     
-</div>
 </body>
 </html>
