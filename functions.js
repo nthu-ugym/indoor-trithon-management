@@ -10,6 +10,65 @@ var 已登入 = false;
 
 //$("#radio").prop("checked")
 
+//1. 讀取 Database
+
+//2. 初始現行比賽及過往比賽表格
+
+//3. 初始學院系所表格
+
+var 比賽隊數 = 10;
+// 根據比賽隊數 Appned 報名隊
+for (i=1; i< 比賽隊數+1; i++) {
+  var num = i.toString();
+  var insertHtml = '\
+    <p> \
+      <div class="隊伍格式" >' +num+ '</div>\
+      <select class="新增比賽表格項目內容" name="隊伍學院' +num+ '" id="隊伍學院' +num+ '" style="margin-left:10px" onchange="更改學院(this)">\
+        <!-- 內容 appended by JS code-->\
+      </select>\
+      <select class="新增比賽表格項目內容" style="width:500px" name="隊伍系所' +num+ '" id="隊伍系所' +num+ '" style="margin-left:10px">\
+        <!-- 內容 appended by JS code-->\
+      </select>\
+    </p>';
+  
+
+  //console.log(insertHtml);
+  $("#隊伍院所設定").append(insertHtml);
+}
+
+//init 學院選單
+//get selectedIndex by $("#學院").prop('selectedIndex'
+for (i=1; i< 比賽隊數+1; i++) {
+  所有學院.forEach(學院 => {
+    $("#隊伍學院"+i.toString()).append('<option value="'+學院[0]+'">'+學院[0]+'</option>');
+  });
+  
+  //$("#隊伍學院"+i.toString()).prop("selectedIndex", 3);
+  所有學院[0].forEach(系所 => {
+    $("#隊伍系所"+i.toString()).append('<option id="系所Option' +i.toString()+ '" value="'+系所+'">'+系所+'</option>');    
+  });
+}
+
+
+function 更改學院(selectObject){
+  console.log(selectObject.name, selectObject.selectedIndex, selectObject.id);
+  
+  var 學院Idx   = selectObject.selectedIndex;
+  var 隊伍學院id = selectObject.id;
+  var 隊伍系所id = 隊伍學院id.replace(/學院/i, '系所');
+  var 隊伍號碼   = 隊伍系所id.substr(4,4);
+  
+  console.log(隊伍系所id, 隊伍號碼);
+  
+  $("#系所Option"+隊伍號碼).remove();
+  
+  所有學院[學院Idx].forEach(系所 => {
+    $("#"+隊伍系所id).append('<option id="系所Option'+隊伍號碼+'" value="'+系所+'">'+系所+'</option>');    
+  });  
+  
+}
+
+
 //表格的 schema 定義
 var schemaModel = {
       fields: {
@@ -45,7 +104,7 @@ var defineColumns_現行比賽 = [
   },
   {
     field: "截止時間",
-    //title: "報名截止時間",
+    title: "報名截止時間",
     width: "140px"
   },
   {
@@ -97,7 +156,7 @@ var defineColumns_過往比賽 = [
   },
   {
     field: "截止時間",
-    //title: "報名截止時間",
+    title: "報名截止時間",
     width: "140px"
   },
   {
@@ -217,7 +276,7 @@ function 登出入按鈕click() {
 }
 
 //dynamic add items and click
-//$("#報名名單Div").append('<label class="新增比賽表格項目標題" id="隊伍1">隊伍1</label>');
+//$("#隊伍院所設定").append('<label class="新增比賽表格項目標題" id="隊伍1">隊伍1</label>');
 //$("#隊伍").click({aaa:"a", bbb:"2"}, 新增比賽按鈕click)
 //$("#院所系").append('<option value="資訊">資訊</option>')
 

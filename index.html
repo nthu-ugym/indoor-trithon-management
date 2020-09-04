@@ -18,10 +18,11 @@
 
 </head>
 <body>
+
   <script src="./現行比賽.js"></script>
   <script src="./過往比賽.js"></script>  
-  <script src="functions.js"></script>
-
+  <script src="./院系.js"></script>
+  
 <!--  主頁面-->
   <div id="NTHU_header">
     <div style="font-size:20px;margin-left:30px; margin-right:30px" id="header">
@@ -141,41 +142,61 @@
         <label class="新增比賽表格項目標題">公尺</label>             
       </p>         
 
+      <div id="隊伍院所設定" style="margin-left:0px">  
+        <p>
+          <label class="新增比賽表格項目標題" id="隊伍title"   style="margin-left:0px">隊伍設定</label>
+          <label class="新增比賽表格項目標題" id="學院title" style="margin-left:25px">學院</label>
+          <label class="新增比賽表格項目標題" id="系所title" style="margin-left:120px">系所</label>
+          <!-- 內容 appended by JS code -->
 
+        </p>                  
+      </div>
+      
       <p>
         <button class="新增比賽表格項目標題" onclick="addConfirm()">儲存</button>     
         <label></label>
       </p>
-    </div> 
-    
-    <div id="報名名單Div" style="margin-left:30px">  
-      <p>
-        <label class="新增比賽表格項目標題" id="隊伍title" style="margin-right:50px" >隊伍</label>
-        <label class="新增比賽表格項目標題" id="院所系title" style="margin-right:200px">院所系</label>
-        <label class="新增比賽表格項目標題" id="跑步者title" style="margin-right:200px">跑步</label>
-        <label class="新增比賽表格項目標題" id="飛輪者title" style="margin-right:200px">飛輪</label>
-        <label class="新增比賽表格項目標題" id="划船者title" style="margin-right:200px">划船</label>           
-      </p>
-      <p>
-        <label class="新增比賽表格項目內容" style="margin-right:50px" >1</label>                
-        <select class="新增比賽表格項目內容" name="院所系" id="院所系">
-          <option value="電機">電機</option>
-          <option value="電子">電子</option>
-          <option value="物理">物理</option>
-          <option value="化學">化學</option>
-        </select>  
-         
-        <select class="新增比賽表格項目內容" name="院所系1" id="院所系1">
-          <option value="電機">電機</option>
-          <option value="電子">電子</option>
-          <option value="物理">物理</option>
-          <option value="化學">化學</option>
-        </select>  
-      </p>          
-    </div>
-    
+    </div>    
   </div>
 <!--新增比賽表格結束-->
+  
+<!--報名名單-->
+  <div id="報名名單Div" style="margin-left:30px">
+    <h1 id="報名名單header"><i style="color: dimgray" class="fa fa-list-alt"></i> 報名名單</h1>
+    <p>
+      <label class="報名名單標題">隊伍</label>
+      <label class="報名名單標題">跑步</label>
+      <label class="報名名單標題">飛輪</label>
+      <label class="報名名單標題">划船</label>
+      <label class="報名名單標題">院所</label>     
+    </p>
+    <hr>
+    <!--JS append 內容-->
+  </div>
+<!--報名表單結束-->  
+  
+<!--比賽結果-->
+  <div id="比賽結果Div">
+  </div>
+<!--比賽結果結束--> 
+  
+<!--院所系管理表單-->
+  <div id="院所系管理表單Div" style="margin-left:30px">
+    <h1 id="院所系管理表單header"><i style="color: dimgray" class="fa fa-list-alt"></i> 院所系管理表單</h1>
+    <p>
+      <label class="報名名單標題">清華大學學院</label>
+      <label class="報名名單標題" id="清華大學系所" style="margin:100px">清華大學系所</label>   
+    </p>
+    <p>
+      <input class="報名名單標題" id="學院input" style="margin-top:0px; margin-right:0px; width:200px"> 
+      <button>增加</button>
+      <input class="報名名單標題" id="系所input" style="margin-top:0px; margin-left:60px; margin-right:0px; width:500px"> 
+      <button>增加</button>    
+    </p>
+    <!--JS append 內容-->
+
+  </div>  
+<!--院所系管理表單結束-->  
   
   <style>
     .新增比賽表格項目標題 {
@@ -192,11 +213,30 @@
       font-size: 20px;
       margin-right: 50px;
       margin-top: 0px;
-    }     
+    }
+    
+    .報名名單標題 {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-right: 100px;
+    }
+    .報名名單內容 {
+      font-size: 20px;
+      margin-left: 20px;
+      margin-top: 0px;
+    }    
+    
+    .隊伍格式 {
+      font-size: 20px;
+      width: 95px ;
+      display:inline-block      
+/*      text-align:right;*/
+    }
+    
   </style>
    
-  <script src="./現行比賽.js"></script>
-  <script src="./過往比賽.js"></script>  
+
   <script src="functions.js"></script>   
     
 </body>
