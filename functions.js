@@ -13,6 +13,7 @@ var 已登入 = false;
 //TODO: 1. 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
 var 最後比賽編號 = 4; //模擬資料
 var 比賽編號;
+var 目前比賽頁面; // 1:比賽資訊, 2:報名名單, 3:比賽結果
 
 
 //TODO: 2. 初始現行比賽及過往比賽表格
@@ -194,27 +195,6 @@ $(document).ready(function() {
     columns: defineColumns_過往比賽
   });  
   
-//  $('#報名名單Export').click(function() {
-//    var str = "報名名單";
-//
-//    var blob = new Blob([str], {type: "text/plain"}); 
-//    var url  = window.URL.createObjectURL(blob);
-//   
-//    $(this).attr('href', url).attr('download', "export.csv");
-//
-//  });
-//  
-//  $('#比賽結果Export').click(function() {
-//    var str = "比賽結果";
-//
-//    var blob = new Blob([str], {type: "text/plain"}); 
-//    var url  = window.URL.createObjectURL(blob);
-//   
-//    $(this).attr('href', url).attr('download', "export.csv");
-//
-//  });
-  
-
 });
 
 function 更改學院(selectObject){
@@ -478,7 +458,8 @@ function 比賽資訊click(){
   $("#報名名單Div").hide(); 
   $("#報名名單").css("background", "");$("#報名名單").css("color", "black");   
   $("#比賽結果Div").hide();  
-  $("#比賽結果").css("background", "");$("#比賽結果").css("color", "black");   
+  $("#比賽結果").css("background", "");$("#比賽結果").css("color", "black"); 
+  目前比賽頁面 = 1;
 }
 
 function 報名名單click(){
@@ -488,8 +469,10 @@ function 報名名單click(){
   $("#報名名單").css("background", "orange");$("#報名名單").css("color", "white");   
   $("#比賽結果Div").hide();  
   $("#比賽結果").css("background", "");$("#比賽結果").css("color", "black");   
+  目前比賽頁面 = 2;
   
-  $("#報名名單內容").append("TEST");
+  //使用 append 來顯示報名名單
+  $("#報名名單內容").append("尚未實作"); // For test
 }
 
 function 比賽結果click(){
@@ -498,7 +481,10 @@ function 比賽結果click(){
   $("#報名名單Div").hide(); 
   $("#報名名單").css("background", "");$("#報名名單").css("color", "black");   
   $("#比賽結果Div").show();  
-  $("#比賽結果").css("background", "orange");$("#比賽結果").css("color", "white");     
+  $("#比賽結果").css("background", "orange");$("#比賽結果").css("color", "white");    
+  目前比賽頁面 = 3;
+  //使用 append 來顯示比賽結果
+  $("#比賽結果內容").append("尚未實作"); // For test  
 }
 
 function 院所系管理按鈕click(){
@@ -559,8 +545,8 @@ function ExportClick(index) {
   console.log("Export", index);
   
   var str ="";
-  if (index=2) str = "報名名單";
-  if (index=3) str = "比賽結果";  
+  if (index==2) str = "報名名單";
+  if (index==3) str = "比賽結果";  
 
   var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
   saveAs(blob, str+"_export.txt")
