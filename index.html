@@ -91,8 +91,16 @@
       </p>
 
       <p>
+        <label class="新增比賽表格項目標題">報名截止:</label>
+        <input id="截止日期" class="新增比賽表格項目內容" type="date"> 
+
+        <label class="新增比賽表格項目標題" style="margin-left: 80px" >截止時間:</label>
+        <input id="截止時間" class="新增比賽表格項目內容" type="time" style="margin-left:0px" >        
+      </p>
+           
+      <p>
         <label class="新增比賽表格項目標題">參賽隊數:</label>
-        <input id="參賽隊數" class="新增比賽表格項目內容" style="width:186px" > 
+        <input id="參賽隊數" class="新增比賽表格項目內容" style="width:186px" onchange="隊數修改()" > 
         <label class="新增比賽表格項目標題">隊</label>      
       </p>        
 
@@ -155,7 +163,7 @@
       </div>
       
       <p>
-        <button class="新增比賽表格項目標題" id="新增比賽儲存按鈕" onclick="addConfirm()">儲存</button>     
+        <button class="新增比賽表格項目標題" id="新增比賽儲存按鈕" onclick="saveGame()">儲存</button>     
         <label></label>
       </p>      
     </div>    
