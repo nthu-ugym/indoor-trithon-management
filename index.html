@@ -19,12 +19,15 @@
 
 </head>
 <body>
+ 
+  <div id = "loginDiv" style="display:none"></div>
+  
   <!--Database 資料先用 JS 檔-->
   <script src="./現行比賽.js"></script>
   <script src="./過往比賽.js"></script>  
   <script src="./院系.js"></script>
   
-<!--  主頁面-->
+  <!--  主頁面-->
   <div id="NTHU_header">
     <div style="font-size:20px;margin-left:30px; margin-right:30px" id="header">
       <button style="font-size:20px" id="帳號管理"  onclick="帳號管理click()">帳號管理</button>
@@ -287,7 +290,43 @@
   </style>
    
 
-  <script src="functions.js"></script>   
+  <!--Using Firebase Auth-->
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>  
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+       https://firebase.google.com/docs/web/setup#available-libraries -->
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyDyLvu_y_vWvdTq-GW12d6L0Ju607HAUWM",
+      authDomain: "login-demo-b54e5.firebaseapp.com",
+      databaseURL: "https://login-demo-b54e5.firebaseio.com",
+      projectId: "login-demo-b54e5",
+      storageBucket: "login-demo-b54e5.appspot.com",
+      messagingSenderId: "913099473474",
+      appId: "1:913099473474:web:a627dfc0db0e2d194363db"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
     
+  </script>   
+  
+<!--
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />  
+-->
+   
+<!--
+<script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth__zh_tw.js"></script>
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+-->
+
+<script src="node_modules/firebaseui/dist/firebaseui.js"></script>
+<link type="text/css" rel="stylesheet" href="node_modules/firebaseui/dist/firebaseui.css" />
+    
+  <script src="functions.js"></script>      
 </body>
 </html>

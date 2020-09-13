@@ -1,6 +1,66 @@
 // 初始變數
-
 var 已登入 = false;
+var 登入Email="";
+
+// Firebase auth
+// Initialize the FirebaseUI Widget using Firebase.
+var ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+//var user = firebase.auth().currentUser;
+
+var configUser = {
+  callbacks: {
+    signInFailure: function(error) {
+      return handleUIError(error);
+    },    
+  },
+  allowNewAccountCreation: false,
+  signInSuccessUrl: 'http://127.0.0.1:3988/',
+  signInOptions: [
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      defaultCountry: 'ZH-TW'      
+    },
+  ],
+  // Other config options...
+};
+
+var configSuperUser = {
+  callbacks: {
+    signInFailure: function(error) {
+      return handleUIError(error);
+    },    
+  },
+  allowNewAccountCreation: true,
+  signInSuccessUrl: 'http://127.0.0.1:3988/',
+  signInOptions: [
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      defaultCountry: 'ZH-TW'      
+    },
+  ],
+  // Other config options...
+};
+
+ui.start('#loginDiv', configUser );
+
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    console.log("User is signed in.", user.email);
+    已登入 = true;
+    登入Email = user.email;
+    $("#登出入按鈕").text("登出");   
+    $("#登出入訊息").text("歡迎 "+登入Email);     
+  } else {
+    console.log("No user is signed in.");
+    已登入 = false;
+    登入Email = "";
+    $("#登出入按鈕").text("登入");   
+    $("#登出入訊息").text("請登入進行管理比賽");     
+  }
+});
+// end of Firebase auth
+
 var gameSaveType="New"; //or "Update"
 
 //TODO: 處理輸入參數
