@@ -19,7 +19,7 @@ var configUser = {
     },    
   },
   allowNewAccountCreation: false,
-  signInSuccessUrl: '/index.html',
+  signInSuccessUrl: '/indoor-trithon-management/index.html',
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -36,7 +36,7 @@ var configUser = {
 //    },    
 //  },
 //  allowNewAccountCreation: true,
-//  signInSuccessUrl: '/index.html',
+//  signInSuccessUrl: '/indoor-trithon-management/index.html',
 //  signInOptions: [
 //    {
 //      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
