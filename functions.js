@@ -645,9 +645,19 @@ function 院所系管理按鈕click(){
   $("#院所系管理表單Div").show(); 
 }
 
+var in管理帳號 = false;
 function 帳號管理按鈕click() {
   console.log("帳號管理按鈕click");
-  $("#createAccountDiv").show();
+  if (!in管理帳號) {
+    in管理帳號 = true;
+    $("#帳號管理按鈕").text("關閉管理帳號");
+    $("#createAccountDiv").show();  
+  } else {
+    in管理帳號 = false;
+    $("#帳號管理按鈕").text("管理帳號");
+    $("#createAccountDiv").hide();      
+  }
+  
 }
 
 function createAccount() {
@@ -684,6 +694,8 @@ function createAccount() {
     });  
   }
   
+  in管理帳號 = false;
+  $("#帳號管理按鈕").text("管理帳號");
   $("#createAccountDiv").hide();  
 }
 
@@ -714,7 +726,9 @@ function deleteAccount() {
     alert("查無此帳號: "+emailToDelete);
   }
   
-  $("#createAccountDiv").hide();  
+  in管理帳號 = false;
+  $("#帳號管理按鈕").text("管理帳號");
+  $("#createAccountDiv").hide(); 
   
 }
 
