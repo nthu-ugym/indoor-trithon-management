@@ -22,6 +22,23 @@
  
   <div id = "loginDiv" style="display:none"></div>
   
+  <div id = "createAccountDiv" style="margin-left:30px;display:none">
+    <a style="font-size:30px; font-weight:bold;"><i style="color: dimgray" class="fa fa-user"></i> 帳號管理</a><br><hr>  
+    <label class="新增比賽表格項目標題">新增帳號 Email:</label>
+    <input id="新增帳號email" class="新增比賽表格項目內容" type="email" style="margin-left:61px"><br><br> 
+    <label class="新增比賽表格項目標題">新增帳號 Password:</label>
+    <input id="新增帳號pwd" class="新增比賽表格項目內容" type="password"><br>
+    密碼格式必須介於 6 到 20 個字，包含至少一個數字，一個大寫英文字母和一個小寫英文字母。不要使用特殊字元。
+    
+    <br><br>
+    <button class="新增比賽表格項目標題" id="新增帳號按鈕" onclick="createAccount()">新增帳號</button>
+    <br><br><hr>
+    <label class="新增比賽表格項目標題">刪除帳號 Email:</label>
+    <input id="刪除帳號email" class="新增比賽表格項目內容" type="email" style="margin-left:61px"><br><br> 
+    <button class="新增比賽表格項目標題" id="刪除帳號按鈕" onclick="deleteAccount()" style="background:red;color:white" >刪除帳號</button>    
+    <br><br><hr>
+  </div>  
+  
   <!--Database 資料先用 JS 檔-->
   <script src="./現行比賽.js"></script>
   <script src="./過往比賽.js"></script>  
@@ -30,8 +47,8 @@
   <!--  主頁面-->
   <div id="NTHU_header">
     <div style="font-size:20px;margin-left:30px; margin-right:30px" id="header">
-      <button style="font-size:20px" id="帳號管理"  onclick="帳號管理click()">帳號管理</button>
-      <button style="font-size:20px" id="院所系管理按鈕" onclick="院所系管理按鈕click()">院所系管理</button> 
+      <button style="font-size:20px" disabled="disabled" id="帳號管理按鈕"  onclick="帳號管理按鈕click()">帳號管理</button>
+      <button style="font-size:20px" disabled="disabled" id="院所系管理按鈕" onclick="院所系管理按鈕click()">院所系管理</button> 
       <button style="font-size:20px" id="登出入按鈕"  onclick="登出入按鈕click()">登入</button> 
       <a id="登出入訊息">請登入進行管理比賽</a>
       <hr>
@@ -294,6 +311,7 @@
   <!-- The core Firebase JS SDK is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
 
   <!-- TODO: Add SDKs for Firebase products that you want to use
        https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -301,17 +319,19 @@
   <script>
     // Your web app's Firebase configuration
     var firebaseConfig = {
-      apiKey: "AIzaSyDyLvu_y_vWvdTq-GW12d6L0Ju607HAUWM",
-      authDomain: "login-demo-b54e5.firebaseapp.com",
-      databaseURL: "https://login-demo-b54e5.firebaseio.com",
-      projectId: "login-demo-b54e5",
-      storageBucket: "login-demo-b54e5.appspot.com",
-      messagingSenderId: "913099473474",
-      appId: "1:913099473474:web:a627dfc0db0e2d194363db"
+      apiKey: "AIzaSyBgl5W2fCn5Rg5Di0Z20t9OJkcFNi0H8Cc",
+      authDomain: "nthu-ugym.firebaseapp.com",
+      databaseURL: "https://nthu-ugym.firebaseio.com",
+      projectId: "nthu-ugym",
+      storageBucket: "nthu-ugym.appspot.com",
+      messagingSenderId: "599973079376",
+      appId: "1:599973079376:web:ee83ddfee38508bac26455"
     };
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     
+    var usedForCreateAccount = firebase.initializeApp(firebaseConfig, "secondary");
+    var database = firebase.database();
   </script>   
   
 <!--
@@ -324,8 +344,8 @@
 <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
 -->
 
-<script src="firebaseui.js"></script>
-<link type="text/css" rel="stylesheet" href="firebaseui.css" />
+  <script src="firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="firebaseui.css" />
     
   <script src="functions.js"></script>      
 </body>

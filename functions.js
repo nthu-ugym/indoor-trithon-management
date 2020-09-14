@@ -1,6 +1,10 @@
 // 初始變數
-var 已登入 = false;
+var 已登入 = -1; // -1:未登入, 0:登入中, 1:已登入
 var 登入Email="";
+$("#帳號管理按鈕").prop("disabled","disabled");
+$("#院所系管理按鈕").prop("disabled","disabled");
+
+var validEmails=[];
 
 // Firebase auth
 // Initialize the FirebaseUI Widget using Firebase.
@@ -15,7 +19,7 @@ var configUser = {
     },    
   },
   allowNewAccountCreation: false,
-  signInSuccessUrl: 'http://127.0.0.1:3988/',
+  signInSuccessUrl: '/index.html',
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -25,38 +29,88 @@ var configUser = {
   // Other config options...
 };
 
-var configSuperUser = {
-  callbacks: {
-    signInFailure: function(error) {
-      return handleUIError(error);
-    },    
-  },
-  allowNewAccountCreation: true,
-  signInSuccessUrl: 'http://127.0.0.1:3988/',
-  signInOptions: [
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      defaultCountry: 'ZH-TW'      
-    },
-  ],
-  // Other config options...
-};
+//var configSuperUser = {
+//  callbacks: {
+//    signInFailure: function(error) {
+//      return handleUIError(error);
+//    },    
+//  },
+//  allowNewAccountCreation: true,
+//  signInSuccessUrl: '/index.html',
+//  signInOptions: [
+//    {
+//      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+//      defaultCountry: 'ZH-TW'      
+//    },
+//  ],
+//  // Other config options...
+//};
 
-ui.start('#loginDiv', configUser );
+//ui.start('#loginDiv', configUser);
 
-firebase.auth().onAuthStateChanged(function(user) {
+firebase.auth().onAuthStateChanged(async function(user) {
   if (user) {
     console.log("User is signed in.", user.email);
-    已登入 = true;
-    登入Email = user.email;
-    $("#登出入按鈕").text("登出");   
-    $("#登出入訊息").text("歡迎 "+登入Email);     
+      
+    console.log(validEmails.length);    
+    await database.ref('/validEmails').once('value', e=>{ 
+      validEmails=JSON.parse(e.val());  
+    });
+    
+    console.log(validEmails);
+    
+    var userIsValid=false;
+    //check if the user is in the white list
+    for (var i=0; i<validEmails.length; i++){
+      console.log(validEmails[i], user.email)
+      if (validEmails[i]==user.email){
+        userIsValid = true;
+        break;
+      }
+    }
+    
+    console.log("uservalid", userIsValid);
+    if (!userIsValid) {
+      alert("此帳號已無效");
+      firebase.auth().signOut();
+      return;
+    }
+    
+    if (user.email!="superadmin@test.com" && !user.emailVerified) {
+      alert(user.email+" 帳號已產生，請收 eamil 進行驗證後，才能正式登入!");
+      
+      user.sendEmailVerification().then(function() {
+        // Email sent.
+      }).catch(function(error) {
+        // An error happened.
+      });
+      
+      firebase.auth().signOut();
+    }
+      
+    if (user.email=="superadmin@test.com" || user.emailVerified) {
+      已登入 = 1;
+      登入Email = user.email;
+      $("#登出入按鈕").text("登出");   
+      $("#登出入訊息").text("歡迎 "+登入Email);   
+
+      if (登入Email=="superadmin@test.com"){
+        $("#帳號管理按鈕").prop("disabled","");    
+        $("#院所系管理按鈕").prop("disabled","");       
+      } else {  
+          $("#帳號管理按鈕").prop("disabled","disabled");    
+          $("#院所系管理按鈕").prop("disabled","disabled");         
+      }
+    }
+    
   } else {
     console.log("No user is signed in.");
-    已登入 = false;
+    已登入 = -1;
     登入Email = "";
     $("#登出入按鈕").text("登入");   
     $("#登出入訊息").text("請登入進行管理比賽");     
+    $("#帳號管理按鈕").prop("disabled","disabled");    
+    $("#院所系管理按鈕").prop("disabled","disabled");      
   }
 });
 // end of Firebase auth
@@ -212,7 +266,7 @@ var defineColumns_過往比賽 = [
   {
     field: "比賽編號",
     title: " ",
-    template: "<div onclick='editClick(this)'><i style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
+    template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-info-circle'></i></div>",
     width:"50px",        
   }
 ];
@@ -318,6 +372,10 @@ function 回主畫面(){
 //現行比賽的 Edit 按鈕 handler
 function editClick(e) {
   console.log("edit click");
+  if (已登入!=1) {
+    alert("請先登入才可以編輯修改比賽");
+    return;
+  }  
   
   gameSaveType = "Update";
   
@@ -481,16 +539,24 @@ function infoClick(e) {
 //登出入按鈕 handler
 function 登出入按鈕click() {
   console.log("登出入按鈕click", );
-  if (已登入) {
+  if (已登入== -1) { //未登入，進行登入
+    已登入 = 0;
+    $("#登出入按鈕").html("取消登入");
+    $("#登出入訊息").html("請登入進行管理比賽");  
+    ui.start('#loginDiv', configUser);
+    $("#loginDiv").show();
+
+  } else if (已登入== 0){
     $("#登出入按鈕").html("登入");
-    $("#登出入訊息").html("請登入進行管理比賽");        
-    已登入 = false;
-    console.log("已登出");
+    已登入 = -1;       
+    $("#登出入訊息").html("請登入進行管理比賽");          
+    $("#loginDiv").hide();
   } else {
+    firebase.auth().signOut();
     $("#登出入按鈕").html("登出");
     已登入 = true;       
     $("#登出入訊息").html("已登入，不用時請登出");          
-    console.log("已登入");
+    console.log("已登入");    
   }
 }
 
@@ -501,6 +567,10 @@ function 登出入按鈕click() {
 
 function 新增比賽按鈕click(){
   console.log("新增比賽");
+  if (已登入!=1) {
+    alert("請先登入才可以新增比賽");
+    return;
+  }
   
   gameSaveType = "New";
   
@@ -573,6 +643,79 @@ function 院所系管理按鈕click(){
   $("#mainPage").hide();
   $("#新增比賽表格Div").hide();
   $("#院所系管理表單Div").show(); 
+}
+
+function 帳號管理按鈕click() {
+  console.log("帳號管理按鈕click");
+  $("#createAccountDiv").show();
+}
+
+function createAccount() {
+  console.log("createAccount");
+  
+  var email    = $("#新增帳號email").val().toLocaleLowerCase();
+  var password = $("#新增帳號pwd").val();
+  console.log(email, password);
+  
+  if (validateEmail(email) && validatePassword(password) ) {
+    console.log("correct email and password", email, password);
+    
+    usedForCreateAccount.auth().createUserWithEmailAndPassword(email, password)
+    .then (function(result) {
+      //alert("新增帳號成功，請先預登入，再收 eamil 進行驗證後，才能登入!"); 
+      result.user.sendEmailVerification()
+      .then(function(result) {
+        validEmails.push(email);
+        database.ref('/validEmails').set(JSON.stringify(validEmails));
+        alert("新增帳號成功，請收 eamil 進行驗證後，才能登入!");   
+      })
+      .catch(function(error) {
+        var errorCode = error.code;      
+        var errorMessage = error.message;
+        alert("驗證 Email 發送失敗:", errorMessage);      
+      });
+    })
+    .catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      alert("新增帳號失敗:", errorMessage);
+      // ...                                                                  
+    });  
+  }
+  
+  $("#createAccountDiv").hide();  
+}
+
+function deleteAccount() {
+  console.log("deleteAccount");
+  
+  var emailToDelete = $("#刪除帳號email").val().toLocaleLowerCase();
+  if (emailToDelete=="superadmin@test.com"){
+    alert("不能刪除 Super User");
+    return;
+  }
+  
+  var index=-1;
+  for (var i =0; i<validEmails.length; i++){
+    if (validEmails[i]==emailToDelete) {
+      index=i;
+      break;
+    }
+  }
+  
+  if (index>-1){
+    validEmails.splice(index,1);
+    if (confirm("確定要刪除 "+emailToDelete)){
+      database.ref('/validEmails').set(JSON.stringify(validEmails));
+      alert("此帳號已被刪除無效");
+    }
+  } else {
+    alert("查無此帳號: "+emailToDelete);
+  }
+  
+  $("#createAccountDiv").hide();  
+  
 }
 
 function 設定隊伍院系所(比賽隊數){
@@ -702,4 +845,24 @@ function 隊數修改() {
     }     
   }
   
+}
+
+function validateEmail(mail) {
+  var mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+  if(mailformat.test(mail)) {
+    return (true);
+  }
+    alert("Email 格式輸入錯誤!")
+    return (false);
+}
+
+function validatePassword(password) {
+  var passwordformat = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+  if(passwordformat.test(password)) {
+    return (true);
+  }
+    alert("密碼格式必須介於 6 到 20 個字，包含至少一個數字，一個大寫英文字母和一個小寫英文字母。不要使用特殊字元。")
+    return (false);
 }
