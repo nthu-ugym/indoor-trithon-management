@@ -4,117 +4,6 @@ var 登入Email="";
 $("#帳號管理按鈕").prop("disabled","disabled");
 $("#院所系管理按鈕").prop("disabled","disabled");
 
-var validEmails=[];
-
-// Firebase auth
-// Initialize the FirebaseUI Widget using Firebase.
-var ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-//var user = firebase.auth().currentUser;
-
-var configUser = {
-  callbacks: {
-    signInFailure: function(error) {
-      return handleUIError(error);
-    },    
-  },
-  allowNewAccountCreation: false,
-  signInSuccessUrl: '/indoor-trithon-management/index.html',
-  signInOptions: [
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      defaultCountry: 'ZH-TW'      
-    },
-  ],
-  // Other config options...
-};
-
-//var configSuperUser = {
-//  callbacks: {
-//    signInFailure: function(error) {
-//      return handleUIError(error);
-//    },    
-//  },
-//  allowNewAccountCreation: true,
-//  signInSuccessUrl: '/indoor-trithon-management/index.html',
-//  signInOptions: [
-//    {
-//      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-//      defaultCountry: 'ZH-TW'      
-//    },
-//  ],
-//  // Other config options...
-//};
-
-//ui.start('#loginDiv', configUser);
-
-firebase.auth().onAuthStateChanged(async function(user) {
-  if (user) {
-    console.log("User is signed in.", user.email);
-      
-    console.log(validEmails.length);    
-    await database.ref('/validEmails').once('value', e=>{ 
-      validEmails=JSON.parse(e.val());  
-    });
-    
-    console.log(validEmails);
-    
-    var userIsValid=false;
-    //check if the user is in the white list
-    for (var i=0; i<validEmails.length; i++){
-      console.log(validEmails[i], user.email)
-      if (validEmails[i]==user.email){
-        userIsValid = true;
-        break;
-      }
-    }
-    
-    console.log("uservalid", userIsValid);
-    if (!userIsValid) {
-      alert("此帳號已無效");
-      firebase.auth().signOut();
-      return;
-    }
-    
-    if (user.email!="superadmin@test.com" && !user.emailVerified) {
-      alert(user.email+" 帳號已產生，請收 eamil 進行驗證後，才能正式登入!");
-      
-      user.sendEmailVerification().then(function() {
-        // Email sent.
-      }).catch(function(error) {
-        // An error happened.
-      });
-      
-      firebase.auth().signOut();
-    }
-      
-    if (user.email=="superadmin@test.com" || user.emailVerified) {
-      已登入 = 1;
-      登入Email = user.email;
-      $("#登出入按鈕").text("登出");   
-      $("#登出入訊息").text("歡迎 "+登入Email);   
-
-      if (登入Email=="superadmin@test.com"){
-        $("#帳號管理按鈕").prop("disabled","");    
-        $("#院所系管理按鈕").prop("disabled","");       
-      } else {  
-          $("#帳號管理按鈕").prop("disabled","disabled");    
-          $("#院所系管理按鈕").prop("disabled","disabled");         
-      }
-    }
-    
-  } else {
-    console.log("No user is signed in.");
-    已登入 = -1;
-    登入Email = "";
-    $("#登出入按鈕").text("登入");   
-    $("#登出入訊息").text("請登入進行管理比賽");     
-    $("#帳號管理按鈕").prop("disabled","disabled");    
-    $("#院所系管理按鈕").prop("disabled","disabled");      
-  }
-});
-// end of Firebase auth
-
 var gameSaveType="New"; //or "Update"
 
 //TODO: 處理輸入參數
@@ -880,3 +769,70 @@ function validatePassword(password) {
     alert("密碼格式必須介於 6 到 20 個字，包含至少一個數字，一個大寫英文字母和一個小寫英文字母。不要使用特殊字元。")
     return (false);
 }
+
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    console.log("User is signed in.", user.email);
+      
+    console.log(validEmails.length);    
+    await database.ref('/validEmails').once('value', e=>{ 
+      validEmails=JSON.parse(e.val());  
+    });
+    
+    console.log(validEmails);
+    
+    var userIsValid=false;
+    //check if the user is in the white list
+    for (var i=0; i<validEmails.length; i++){
+      console.log(validEmails[i], user.email)
+      if (validEmails[i]==user.email){
+        userIsValid = true;
+        break;
+      }
+    }
+    
+    console.log("uservalid", userIsValid);
+    if (!userIsValid) {
+      alert("此帳號已無效");
+      firebase.auth().signOut();
+      return;
+    }
+    
+    if (user.email!="superadmin@test.com" && !user.emailVerified) {
+      alert(user.email+" 帳號已產生，請收 eamil 進行驗證後，才能正式登入!");
+      
+      user.sendEmailVerification().then(function() {
+        // Email sent.
+      }).catch(function(error) {
+        // An error happened.
+      });
+      
+      firebase.auth().signOut();
+    }
+      
+    if (user.email=="superadmin@test.com" || user.emailVerified) {
+      已登入 = 1;
+      登入Email = user.email;
+      $("#登出入按鈕").text("登出");   
+      $("#登出入訊息").text("歡迎 "+登入Email);   
+
+      if (登入Email=="superadmin@test.com"){
+        $("#帳號管理按鈕").prop("disabled","");    
+        $("#院所系管理按鈕").prop("disabled","");       
+      } else {  
+          $("#帳號管理按鈕").prop("disabled","disabled");    
+          $("#院所系管理按鈕").prop("disabled","disabled");         
+      }
+    }
+    
+  } else {
+    console.log("No user is signed in.");
+    已登入 = -1;
+    登入Email = "";
+    $("#登出入按鈕").text("登入");   
+    $("#登出入訊息").text("請登入進行管理比賽");     
+    $("#帳號管理按鈕").prop("disabled","disabled");    
+    $("#院所系管理按鈕").prop("disabled","disabled");      
+  }
+});
+

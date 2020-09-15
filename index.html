@@ -305,47 +305,15 @@
     }
     
   </style>
-   
-
-  <!--Using Firebase Auth-->
   <!-- The core Firebase JS SDK is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>  
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
-
-  <!-- TODO: Add SDKs for Firebase products that you want to use
-       https://firebase.google.com/docs/web/setup#available-libraries -->
-
-  <script>
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: "AIzaSyBgl5W2fCn5Rg5Di0Z20t9OJkcFNi0H8Cc",
-      authDomain: "nthu-ugym.firebaseapp.com",
-      databaseURL: "https://nthu-ugym.firebaseio.com",
-      projectId: "nthu-ugym",
-      storageBucket: "nthu-ugym.appspot.com",
-      messagingSenderId: "599973079376",
-      appId: "1:599973079376:web:ee83ddfee38508bac26455"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    
-    var usedForCreateAccount = firebase.initializeApp(firebaseConfig, "secondary");
-    var database = firebase.database();
-  </script>   
   
-<!--
-  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />  
--->
-   
-<!--
-<script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth__zh_tw.js"></script>
-<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
--->
-
   <script src="firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="firebaseui.css" />
+   
+  <script src="firebase_config.min.js"></script>      
     
   <script src="functions.js"></script>      
 </body>
