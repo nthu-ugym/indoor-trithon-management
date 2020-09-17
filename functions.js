@@ -26,9 +26,14 @@ var 目前比賽頁面; // 1:比賽資訊, 2:報名名單, 3:比賽結果
 所有學院.forEach(學院 => {
   if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
 });
-所有學院[1].forEach(系所 => {
-  $("#所系List").append('<div id="系所List" class="系所List內容">'+系所+'</div>');       
-});
+//所有學院[1].forEach(系所 => {
+//  $("#所系List").append('<div id="系所List" class="系所List內容">'+系所+' <a style="font-size:5px; color:red" onlcik> delete </a></div>');       
+//});
+
+$("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
+for (var i=1; i< 所有學院[1].length; i++) {
+  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+}
 
 //比賽表格的 schema 定義
 var schemaModel = {
@@ -96,11 +101,17 @@ var defineColumns_現行比賽 = [
     width: "130px"
   },                  
   {
-    field: "比賽編號",
+    field: "比賽名稱",
     title: " ",
-    template: "<div onclick='editClick(this)'><i style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
+    template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
     width:"50px",        
-  }
+  },
+  {
+    field: "比賽名稱",
+    title: " ",
+    template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
+    width:"50px",        
+  }  
 ];
 
 var defineColumns_過往比賽 = [
@@ -153,7 +164,7 @@ var defineColumns_過往比賽 = [
     width: "130px"
   },                  
   {
-    field: "比賽編號",
+    field: "比賽名稱",
     title: " ",
     template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-info-circle'></i></div>",
     width:"50px",        
@@ -244,9 +255,13 @@ function 學院Selected(學院){
   }
   
   $("#系所List").remove();
-  所有學院[學院Idx].forEach(系所 => {
-    $("#所系List").append('<div id="系所List" class="系所List內容">'+系所+'</div>');       
-  });   
+//  所有學院[學院Idx].forEach(系所 => {
+//    $("#所系List").append('<div id="系所List" class="系所List內容">'+系所+'</div>');       
+//  }); 
+  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[學院Idx][0]+'</div>');
+  for (var i=1; i< 所有學院[1].length; i++) {
+    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[學院Idx][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+  }  
   
 }
 
@@ -346,6 +361,35 @@ function editClick(e) {
   $("#比賽結果").prop("disabled", false);  
   比賽資訊click();  
 }    
+
+function 直播link(e) {
+  console.log("直播link");
+  if (已登入!=1) {
+    alert("請先登入才可以編輯直播連結");
+    return;
+  }  
+  
+  gameSaveType = "Update";
+  
+  var 現行比賽表格 = $("#現行比賽表格").data("kendoGrid");
+  var dataItem = 現行比賽表格.dataItem($(e).closest("tr"));
+  console.log(dataItem.比賽編號);
+  //var selectedGame;
+  games.forEach( 
+    game => {
+      //console.log(game.比賽編號);
+      if (game.比賽編號==dataItem.比賽編號) selectedGame=game;
+    }
+  );
+  
+  var broadcastingUrl = prompt("請輸入直播連結:", "https://");
+  selectedGame.直播連結 = (broadcastingUrl==null)? "":broadcastingUrl; 
+  
+  console.log(selectedGame);
+  
+  //TODO: call API to save the game.
+}
+
 
 //過往比賽的 Info 按鈕 handler
 function infoClick(e) {
@@ -454,6 +498,26 @@ function 登出入按鈕click() {
 //$("#隊伍").click({aaa:"a", bbb:"2"}, 新增比賽按鈕click)
 //$("#院所系").append('<option value="資訊">資訊</option>')
 
+function delete系所(index){
+  
+  var 系所名 = $("#清華大學系所").text();
+  
+  var 學院Idx;
+  for (var i=0; i< 所有學院.length; i++){
+    if (所有學院[i][0]==系所名) {
+      console.log(i);
+      學院Idx = i;
+      break;
+    }
+  }
+  
+  console.log("學院", 學院Idx, " 系所", index);
+  console.log("delete ", 所有學院[學院Idx][index])
+  
+  var deleteIt = confirm("確定要刪除 "+所有學院[學院Idx][index]+" 嗎?");
+  //TODO: delete 系所
+}
+
 function 新增比賽按鈕click(){
   console.log("新增比賽");
   if (已登入!=1) {
@@ -547,6 +611,14 @@ function 帳號管理按鈕click() {
     $("#createAccountDiv").hide();      
   }
   
+}
+
+function 增加學院按鈕click(){
+  console.log("增加學院按鈕click");
+}
+
+function 增加所系按鈕click(){
+  console.log("增加所系按鈕click");  
 }
 
 function createAccount() {
