@@ -40,9 +40,9 @@
   </div>  
   
   <!--Database 資料先用 JS 檔-->
-  <script src="./現行比賽.js"></script>
-  <script src="./過往比賽.js"></script>  
-  <script src="./院系.js"></script>
+  <script src="./模擬資料.js"></script>
+  <!--  <script src="./過往比賽.js"></script>  -->
+  <!--  <script src="./院系.js"></script>-->
   
   <!--  主頁面-->
   <div id="NTHU_header">
@@ -51,6 +51,7 @@
       <button style="font-size:20px" disabled="disabled" id="院所系管理按鈕" onclick="院所系管理按鈕click()">院所系管理</button> 
       <button style="font-size:20px" id="登出入按鈕"  onclick="登出入按鈕click()">登入</button> 
       <a id="登出入訊息">請登入進行管理比賽</a>
+      <a id="版本" style="float:right;font-size:12px;margin-top:15px">v0.00</a>
       <hr>
       <img src='%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8logo.jpg'>
 
@@ -306,6 +307,7 @@
     }
     
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <!-- The core Firebase JS SDK is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>  

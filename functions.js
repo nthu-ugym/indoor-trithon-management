@@ -1,3 +1,24 @@
+// Test session ===========================
+async function aaa() {
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code=Debug123')
+  .then(function (response) {
+    // handle success
+    console.log(response.data);
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("aaa is done");
+}
+// end of test session ======================
+
+$("#版本").text("V0.51");
+
 // 初始變數
 var 已登入 = -1; // -1:未登入, 0:登入中, 1:已登入
 var 登入Email="";
@@ -14,27 +35,36 @@ var gameSaveType="New"; //or "Update"
 
 //$("#radio").prop("checked")
 
-//TODO: 1. 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
+//1. TODO: API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
 var 最後比賽編號 = 4; //模擬資料
 var 比賽編號;
 var 目前比賽頁面; // 1:比賽資訊, 2:報名名單, 3:比賽結果
 
+var games, gamehistory, 所有學院=[["無"]];
+//模擬 API 讀取 games，延遲 1000ms
+setTimeout(()=> {games = JSON.parse(gameStr); $("#現行比賽表格").data("kendoGrid").dataSource.success(games);},1000);
 
-//TODO: 2. 初始現行比賽及過往比賽表格
+//模擬 API 讀取 gamehistory，延遲 1000ms
+setTimeout(()=> {gamehistory = JSON.parse(gamehistoryStr); $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);},1000);
 
-//3. 初始學院系所表格
-所有學院.forEach(學院 => {
-  if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
-});
-//所有學院[1].forEach(系所 => {
-//  $("#所系List").append('<div id="系所List" class="系所List內容">'+系所+' <a style="font-size:5px; color:red" onlcik> delete </a></div>');       
-//});
+//模擬 API 讀取 學院資料，延遲 1000ms
+setTimeout(()=> {
+  var 學院 = JSON.parse(學院Str);
+  var 學院keys = Object.keys(學院);
+  
+  學院keys.forEach(key=>{ 所有學院.push(學院[key])})
+  
+  所有學院.forEach(學院 => {
+    if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
+  });
 
-$("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
-for (var i=1; i< 所有學院[1].length; i++) {
-  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
-}
+  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
+  for (var i=1; i< 所有學院[1].length; i++) {
+    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+  }
+},1000);
 
+//3. 初始現行比賽及過往比賽表格
 //比賽表格的 schema 定義
 var schemaModel = {
       fields: {
@@ -176,7 +206,7 @@ $(document).ready(function() {
   $("#新增比賽表格Div").hide();
   $("#院所系管理表單Div").hide(); 
   $("#比賽資訊").css("background", "orange");$("#比賽資訊").css("color", "white");  
-  
+
   //實體化現行比賽表格
   $("#現行比賽表格").kendoGrid({
     dataSource: {
@@ -220,7 +250,7 @@ $(document).ready(function() {
     },
     columns: defineColumns_過往比賽
   });  
-  
+
 });
 
 function 更改學院(selectObject){
@@ -382,8 +412,9 @@ function 直播link(e) {
     }
   );
   
-  var broadcastingUrl = prompt("請輸入直播連結:", "https://");
-  selectedGame.直播連結 = (broadcastingUrl==null)? "":broadcastingUrl; 
+  var promptLink = (selectedGame.直播連結=="")? "https://":selectedGame.直播連結; 
+  var broadcastingUrl = prompt("請輸入直播連結:", promptLink);
+  selectedGame.直播連結 = (broadcastingUrl==null)? selectedGame.直播連結:broadcastingUrl; 
   
   console.log(selectedGame);
   
@@ -779,30 +810,34 @@ function 隊數修改() {
     return;
   }
 
-  設定隊伍院系所(隊數);
+  //設定隊伍院系所(隊數);
   
   if (隊數 < selectedGame.隊數限制){
     setTimeout(function() { //setTimeout 是為了不要讓 alert 擋住前面 $("#參賽隊數").val(隊數Str);
       if (confirm("比原先設定的隊數減少，有些設定會被清除，請確定!!!")){
-        for (var i=0; i<隊數; i++){
-          var 學院系所Arr = selectedGame.學院系所[i].split(',');
-          var 學院Arr = 學院系所Arr[0].split(':');
-          var 系所Arr = 學院系所Arr[1].split(':');    
+        設定隊伍院系所(隊數);
+        if (selectedGame.學院系所.length>0){
+          for (var i=0; i<隊數; i++){
+            var 學院系所Arr = selectedGame.學院系所[i].split(',');
+            var 學院Arr = 學院系所Arr[0].split(':');
+            var 系所Arr = 學院系所Arr[1].split(':');    
 
-          console.log(學院Arr[0], 學院Arr[1], 系所Arr[0], 系所Arr[1]);
+            console.log(學院Arr[0], 學院Arr[1], 系所Arr[0], 系所Arr[1]);
 
-          $("#隊伍學院"+(i+1).toString()).val(學院Arr[1]);
+            $("#隊伍學院"+(i+1).toString()).val(學院Arr[1]);
 
-          $("#系所Option"+(i+1).toString()).remove();
-          所有學院[parseInt(學院Arr[0])].forEach(系所 => {
-            $("#隊伍系所"+(i+1).toString()).append('<option id="系所Option'+(i+1).toString()+'" value="'+系所+'">'+系所+'</option>');    
-          });  
-          $("#隊伍系所"+(i+1).toString()).val(系所Arr[1]);
-        }    
+            $("#系所Option"+(i+1).toString()).remove();
+            所有學院[parseInt(學院Arr[0])].forEach(系所 => {
+              $("#隊伍系所"+(i+1).toString()).append('<option id="系所Option'+(i+1).toString()+'" value="'+系所+'">'+系所+'</option>');    
+            });  
+            $("#隊伍系所"+(i+1).toString()).val(系所Arr[1]);
+          }    
+        }
       }
     }, 10);
     
   } else {
+    設定隊伍院系所(隊數);
     for (var i=0; i<selectedGame.隊數限制; i++){
       var 學院系所Arr = selectedGame.學院系所[i].split(',');
       var 學院Arr = 學院系所Arr[0].split(':');
