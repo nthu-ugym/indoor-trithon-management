@@ -673,7 +673,16 @@ function 報名名單click(){
   目前比賽頁面 = 2;
   
   //使用 append 來顯示報名名單
-  $("#報名名單內容").append("尚未實作"); // For test
+  try {//先清除舊的資料
+    $("#報名名單內容細節").remove(); 
+  } catch (e) {
+    console.loge(e);
+  }
+
+  //append 新的資料
+  $("#報名名單內容").append("<div id='報名名單內容細節'>");
+  $("#報名名單內容細節").append("尚未實作:比賽編號-"+比賽編號.toString()); // For test  
+  $("#報名名單內容").append("</div>");
 }
 
 function 比賽結果click(){
@@ -684,8 +693,18 @@ function 比賽結果click(){
   $("#比賽結果Div").show();  
   $("#比賽結果").css("background", "orange");$("#比賽結果").css("color", "white");    
   目前比賽頁面 = 3;
+  
   //使用 append 來顯示比賽結果
-  $("#比賽結果內容").append("尚未實作"); // For test  
+  try {//先清除舊的資料
+  $("#比賽結果內容細節").remove(); 
+  } catch (e) {
+    console.loge(e);
+  }
+  
+  //append 新的資料
+  $("#比賽結果內容").append("<div id='比賽結果內容細節'>");
+  $("#比賽結果內容細節").append("尚未實作:比賽編號-"+比賽編號.toString()); // For test  
+  $("#比賽結果內容").append("</div>");  
 }
 
 function 院所系管理按鈕click(){
