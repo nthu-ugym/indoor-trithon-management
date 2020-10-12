@@ -1,4 +1,12 @@
 // Test session ===========================
+//TODO: 處理輸入參數
+//const queryString = window.location.search;
+//console.log(queryString);
+//const urlParams = new URLSearchParams(queryString);
+//const name = urlParams.get('name')
+
+//$("#radio").prop("checked")
+
 async function aaa() {
   var APIKEY;
   await database.ref('/APIKEY').once('value', e=>{ 
@@ -23,190 +31,90 @@ async function aaa() {
 }
 // end of test session ======================
 
-$("#版本").text("V0.51");
+$("#版本").text("V0.55");
 
 // 初始變數
 var 已登入 = -1; // -1:未登入, 0:登入中, 1:已登入
 var 登入Email="";
 $("#帳號管理按鈕").prop("disabled","disabled");
 $("#院所系管理按鈕").prop("disabled","disabled");
-
-var gameSaveType="New"; //or "Update"
-
-//TODO: 處理輸入參數
-//const queryString = window.location.search;
-//console.log(queryString);
-//const urlParams = new URLSearchParams(queryString);
-//const name = urlParams.get('name')
-
-//$("#radio").prop("checked")
-
-//1. TODO: API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
-var 最後比賽編號 = 4; //模擬資料
+var 最後比賽編號; 
 var 比賽編號;
 var 目前比賽頁面; // 1:比賽資訊, 2:報名名單, 3:比賽結果
-
 var games, gamehistory, 所有學院=[["無"]];
-//模擬 API 讀取 games，延遲 1000ms
-setTimeout(()=> {games = JSON.parse(gameStr); $("#現行比賽表格").data("kendoGrid").dataSource.success(games);},1000);
+var gameSaveType="New"; //or "Update"
+var schemaModel;
+var defineColumns_現行比賽;
+var defineColumns_過往比賽;
+var in管理帳號 = false;
+var 隊數;
 
-//模擬 API 讀取 gamehistory，延遲 1000ms
-setTimeout(()=> {gamehistory = JSON.parse(gamehistoryStr); $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);},1000);
+initializaData();
 
-get學院();
-//模擬 API 讀取 學院資料，延遲 1000ms
-//setTimeout(()=> {
-//  var 學院 = JSON.parse(學院Str);
-//  var 學院keys = Object.keys(學院);
-//  
-//  學院keys.forEach(key=>{ 所有學院.push(學院[key])})
-//  
-//  所有學院.forEach(學院 => {
-//    if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
-//  });
-//
-//  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
-//  for (var i=1; i< 所有學院[1].length; i++) {
-//    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
-//  }
-//},1000);
-
-//3. 初始現行比賽及過往比賽表格
-//比賽表格的 schema 定義
-var schemaModel = {
-      fields: {
-        比賽編號: { type: "string" },        
-        比賽日期: { type: "string" },
-        比賽名稱: { type: "string" },
-        時間範圍: { type: "string" },
-        截止時間: { type: "string" },            
-        人數限制: { type: "number" },
-        報名人數: { type: "number" },
-        比賽種類: { type: "string" }, 
-        比賽距離: { type: "string" },             
+firebase.auth().onAuthStateChanged(async function(user) {
+  if (user) {
+    console.log("User is signed in.", user.email);
+      
+    await database.ref('/validEmails').once('value', e=>{ 
+      validEmails=JSON.parse(e.val());  
+    });
+    
+    //console.log(validEmails);
+    
+    var userIsValid=false;
+    //check if the user is in the white list
+    for (var i=0; i<validEmails.length; i++){
+      //console.log(validEmails[i], user.email)
+      if (validEmails[i]==user.email){
+        userIsValid = true;
+        break;
       }
-    };
+    }
+    
+    //console.log("uservalid", userIsValid);
+    if (!userIsValid) {
+      alert("此帳號已無效");
+      firebase.auth().signOut();
+      return;
+    }
+    
+    if (user.email!="superadmin@test.com" && !user.emailVerified) {
+      alert(user.email+" 帳號已產生，請收 eamil 進行驗證後，才能正式登入!");
+      
+      user.sendEmailVerification().then(function() {
+        // Email sent.
+      }).catch(function(error) {
+        // An error happened.
+      });
+      
+      firebase.auth().signOut();
+    }
+      
+    if (user.email=="superadmin@test.com" || user.emailVerified) {
+      已登入 = 1;
+      登入Email = user.email;
+      $("#登出入按鈕").text("登出");   
+      $("#登出入訊息").text("歡迎 "+登入Email);   
 
-//比賽表格的 欄位 定義
-var defineColumns_現行比賽 = [
-  {
-    field: "比賽編號",
-    title: "編號",
-    //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
-    width: "70px"
-  },  
-  {
-    field: "比賽名稱",
-    //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
-    //width: "230px"
-  },  
-  {
-    field: "比賽日期",
-    //format: "{0:MM/dd/yyyy}",
-    //format: "{0:yyyy-MM-dd}",
-    title: "比賽日期",
-    width: "100px",
-  },
-  {
-    field: "時間範圍",
-    title: "比賽時間",
-    width: "100px"
-  },
-  {
-    field: "截止時間",
-    title: "報名截止時間",
-    width: "120px"
-  },
-  {
-    field: "隊數限制",
-    //title: "人數限制",
-    width: "75px"
-  },
-  {
-    field: "報名人數",
-    //title: "報名人數",
-    width: "75px"
-  },      
-  {
-    field: "比賽種類",
-    //title: "比賽種類",
-    width: "100px"
-  },
-  {
-    field: "比賽距離",
-    //title: "比賽距離",
-    width: "130px"
-  },                  
-  {
-    field: "比賽名稱",
-    title: " ",
-    template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
-    width:"50px",        
-  },
-  {
-    field: "比賽名稱",
-    title: " ",
-    template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
-    width:"50px",        
-  }  
-];
-
-var defineColumns_過往比賽 = [
-  {
-    field: "比賽編號",
-    title: "編號",
-    //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
-    width: "70px"
-  },  
-  {
-    field: "比賽名稱",
-    //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
-    //width: "230px"
-  },  
-  {
-    field: "比賽日期",
-    //format: "{0:MM/dd/yyyy}",
-    //format: "{0:yyyy-MM-dd}",
-    title: "比賽日期",
-    width: "100px",
-  },
-  {
-    field: "時間範圍",
-    title: "比賽時間",
-    width: "100px"
-  },
-  {
-    field: "截止時間",
-    title: "報名截止時間",
-    width: "120px"
-  },
-  {
-    field: "隊數限制",
-    //title: "人數限制",
-    width: "75px"
-  },
-  {
-    field: "報名人數",
-    //title: "報名人數",
-    width: "75px"
-  },      
-  {
-    field: "比賽種類",
-    //title: "比賽種類",
-    width: "100px"
-  },
-  {
-    field: "比賽距離",
-    //title: "比賽距離",
-    width: "130px"
-  },                  
-  {
-    field: "比賽名稱",
-    title: " ",
-    template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-info-circle'></i></div>",
-    width:"50px",        
+      if (登入Email=="superadmin@test.com"){
+        $("#帳號管理按鈕").prop("disabled","");    
+        $("#院所系管理按鈕").prop("disabled","");       
+      } else {  
+          $("#帳號管理按鈕").prop("disabled","disabled");    
+          $("#院所系管理按鈕").prop("disabled","disabled");         
+      }
+    }
+    
+  } else {
+    console.log("No user is signed in.");
+    已登入 = -1;
+    登入Email = "";
+    $("#登出入按鈕").text("登入");   
+    $("#登出入訊息").text("請登入進行管理比賽");     
+    $("#帳號管理按鈕").prop("disabled","disabled");    
+    $("#院所系管理按鈕").prop("disabled","disabled");      
   }
-];
+});
 
 $(document).ready(function() {
   
@@ -260,6 +168,158 @@ $(document).ready(function() {
 
 });
 
+//=== Initialization Data =====================
+function initializaData(){
+  //1. TODO: API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
+  最後比賽編號 = 4; //模擬資料
+
+  //模擬 API 讀取 games，延遲 1000ms
+  setTimeout(()=> {games = JSON.parse(gameStr); $("#現行比賽表格").data("kendoGrid").dataSource.success(games);},1000);
+
+  //模擬 API 讀取 gamehistory，延遲 1000ms
+  setTimeout(()=> {gamehistory = JSON.parse(gamehistoryStr); $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);},1000);
+
+  //Use API to get 學院
+  get學院();
+
+  //3. 初始現行比賽及過往比賽表格
+  //比賽表格的 schema 定義
+  schemaModel = {
+        fields: {
+          比賽編號: { type: "string" },        
+          比賽日期: { type: "string" },
+          比賽名稱: { type: "string" },
+          時間範圍: { type: "string" },
+          截止時間: { type: "string" },            
+          人數限制: { type: "number" },
+          報名人數: { type: "number" },
+          比賽種類: { type: "string" }, 
+          比賽距離: { type: "string" },             
+        }
+      };
+
+  //比賽表格的 欄位 定義
+  defineColumns_現行比賽 = [
+    {
+      field: "比賽編號",
+      title: "編號",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      width: "70px"
+    },  
+    {
+      field: "比賽名稱",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      //width: "230px"
+    },  
+    {
+      field: "比賽日期",
+      //format: "{0:MM/dd/yyyy}",
+      //format: "{0:yyyy-MM-dd}",
+      title: "比賽日期",
+      width: "100px",
+    },
+    {
+      field: "時間範圍",
+      title: "比賽時間",
+      width: "100px"
+    },
+    {
+      field: "截止時間",
+      title: "報名截止時間",
+      width: "120px"
+    },
+    {
+      field: "隊數限制",
+      //title: "人數限制",
+      width: "75px"
+    },
+    {
+      field: "報名人數",
+      //title: "報名人數",
+      width: "75px"
+    },      
+    {
+      field: "比賽種類",
+      //title: "比賽種類",
+      width: "100px"
+    },
+    {
+      field: "比賽距離",
+      //title: "比賽距離",
+      width: "130px"
+    },                  
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
+      width:"50px",        
+    },
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
+      width:"50px",        
+    }  
+  ];
+
+  defineColumns_過往比賽 = [
+    {
+      field: "比賽編號",
+      title: "編號",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      width: "70px"
+    },  
+    {
+      field: "比賽名稱",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      //width: "230px"
+    },  
+    {
+      field: "比賽日期",
+      //format: "{0:MM/dd/yyyy}",
+      //format: "{0:yyyy-MM-dd}",
+      title: "比賽日期",
+      width: "100px",
+    },
+    {
+      field: "時間範圍",
+      title: "比賽時間",
+      width: "100px"
+    },
+    {
+      field: "截止時間",
+      title: "報名截止時間",
+      width: "120px"
+    },
+    {
+      field: "隊數限制",
+      //title: "人數限制",
+      width: "75px"
+    },
+    {
+      field: "報名人數",
+      //title: "報名人數",
+      width: "75px"
+    },      
+    {
+      field: "比賽種類",
+      //title: "比賽種類",
+      width: "100px"
+    },
+    {
+      field: "比賽距離",
+      //title: "比賽距離",
+      width: "130px"
+    },                  
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-info-circle'></i></div>",
+      width:"50px",        
+    }
+  ];
+}
+
 function 更改學院(selectObject){
   console.log(selectObject.name, selectObject.selectedIndex, selectObject.id);
   
@@ -301,7 +361,6 @@ function 學院Selected(學院){
   }  
   
 }
-
 
 function 回主畫面(){
   console.log("回主畫面");
@@ -427,7 +486,6 @@ function 直播link(e) {
   
   //TODO: call API to save the game.
 }
-
 
 //過往比賽的 Info 按鈕 handler
 function infoClick(e) {
@@ -636,7 +694,6 @@ function 院所系管理按鈕click(){
   $("#院所系管理表單Div").show(); 
 }
 
-var in管理帳號 = false;
 function 帳號管理按鈕click() {
   console.log("帳號管理按鈕click");
   if (!in管理帳號) {
@@ -801,7 +858,6 @@ function saveGame() {
   }
 }
 
-var 隊數;
 function 隊數修改() {
   console.log("隊數修改");
   var 隊數Str = $("#參賽隊數").val();
@@ -884,78 +940,12 @@ function validatePassword(password) {
     return (false);
 }
 
-firebase.auth().onAuthStateChanged(async function(user) {
-  if (user) {
-    console.log("User is signed in.", user.email);
-      
-    console.log(validEmails.length);    
-    await database.ref('/validEmails').once('value', e=>{ 
-      validEmails=JSON.parse(e.val());  
-    });
-    
-    console.log(validEmails);
-    
-    var userIsValid=false;
-    //check if the user is in the white list
-    for (var i=0; i<validEmails.length; i++){
-      console.log(validEmails[i], user.email)
-      if (validEmails[i]==user.email){
-        userIsValid = true;
-        break;
-      }
-    }
-    
-    console.log("uservalid", userIsValid);
-    if (!userIsValid) {
-      alert("此帳號已無效");
-      firebase.auth().signOut();
-      return;
-    }
-    
-    if (user.email!="superadmin@test.com" && !user.emailVerified) {
-      alert(user.email+" 帳號已產生，請收 eamil 進行驗證後，才能正式登入!");
-      
-      user.sendEmailVerification().then(function() {
-        // Email sent.
-      }).catch(function(error) {
-        // An error happened.
-      });
-      
-      firebase.auth().signOut();
-    }
-      
-    if (user.email=="superadmin@test.com" || user.emailVerified) {
-      已登入 = 1;
-      登入Email = user.email;
-      $("#登出入按鈕").text("登出");   
-      $("#登出入訊息").text("歡迎 "+登入Email);   
-
-      if (登入Email=="superadmin@test.com"){
-        $("#帳號管理按鈕").prop("disabled","");    
-        $("#院所系管理按鈕").prop("disabled","");       
-      } else {  
-          $("#帳號管理按鈕").prop("disabled","disabled");    
-          $("#院所系管理按鈕").prop("disabled","disabled");         
-      }
-    }
-    
-  } else {
-    console.log("No user is signed in.");
-    已登入 = -1;
-    登入Email = "";
-    $("#登出入按鈕").text("登入");   
-    $("#登出入訊息").text("請登入進行管理比賽");     
-    $("#帳號管理按鈕").prop("disabled","disabled");    
-    $("#院所系管理按鈕").prop("disabled","disabled");      
-  }
-});
-
 async function get學院() {
   var APIKEY;
   await database.ref('/APIKEY').once('value', e=>{ 
     APIKEY= e.val();  
   });
-  console.log(APIKEY);
+  //console.log(APIKEY);
   
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code='+APIKEY)
   .then(function (response) {
@@ -983,5 +973,5 @@ async function get學院() {
     // always executed
   });
   
-  console.log("aaa is done");
+  console.log("get學院 is done");
 }
