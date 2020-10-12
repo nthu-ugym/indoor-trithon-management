@@ -1,9 +1,15 @@
 // Test session ===========================
 async function aaa() {
-  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code=Debug123')
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  console.log(APIKEY);
+  
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code='+APIKEY)
   .then(function (response) {
     // handle success
-    console.log(response.data);
+    console.log(JSON.parse(response.data));
   })
   .catch(function (error) {
     // handle error
@@ -47,22 +53,23 @@ setTimeout(()=> {games = JSON.parse(gameStr); $("#現行比賽表格").data("ken
 //模擬 API 讀取 gamehistory，延遲 1000ms
 setTimeout(()=> {gamehistory = JSON.parse(gamehistoryStr); $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);},1000);
 
+get學院();
 //模擬 API 讀取 學院資料，延遲 1000ms
-setTimeout(()=> {
-  var 學院 = JSON.parse(學院Str);
-  var 學院keys = Object.keys(學院);
-  
-  學院keys.forEach(key=>{ 所有學院.push(學院[key])})
-  
-  所有學院.forEach(學院 => {
-    if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
-  });
-
-  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
-  for (var i=1; i< 所有學院[1].length; i++) {
-    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
-  }
-},1000);
+//setTimeout(()=> {
+//  var 學院 = JSON.parse(學院Str);
+//  var 學院keys = Object.keys(學院);
+//  
+//  學院keys.forEach(key=>{ 所有學院.push(學院[key])})
+//  
+//  所有學院.forEach(學院 => {
+//    if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
+//  });
+//
+//  $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
+//  for (var i=1; i< 所有學院[1].length; i++) {
+//    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+//  }
+//},1000);
 
 //3. 初始現行比賽及過往比賽表格
 //比賽表格的 schema 定義
@@ -943,3 +950,38 @@ firebase.auth().onAuthStateChanged(async function(user) {
   }
 });
 
+async function get學院() {
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  console.log(APIKEY);
+  
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code='+APIKEY)
+  .then(function (response) {
+    // handle success
+    var 學院 = JSON.parse(response.data);
+    var 學院keys = Object.keys(學院);
+
+    學院keys.forEach(key=>{ 所有學院.push(學院[key])})
+
+    所有學院.forEach(學院 => {
+      if (學院[0] != "無") $("#學院List").append('<div class="學院List內容" onclick="學院Selected(this)">'+學院[0]+'</div>');
+    });
+
+    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
+    for (var i=1; i< 所有學院[1].length; i++) {
+      $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+    }  
+ 
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("aaa is done");
+}
