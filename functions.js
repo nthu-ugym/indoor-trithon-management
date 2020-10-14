@@ -7,14 +7,14 @@
 
 //$("#radio").prop("checked")
 
-async function aaa() {
+async function aaaGet() {
   var APIKEY;
   await database.ref('/APIKEY').once('value', e=>{ 
     APIKEY= e.val();  
   });
   console.log(APIKEY);
   
-  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code='+APIKEY)
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllActiveGameStatus?Code=Debug123')
   .then(function (response) {
     // handle success
     console.log(JSON.parse(response.data));
@@ -28,6 +28,57 @@ async function aaa() {
   });
   
   console.log("aaa is done");
+}
+async function aaaPOST() {
+  
+  //檢查 response 的 status
+  //.then(function (response) {
+  // if(response.status == 200){...}
+  
+  
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  console.log(APIKEY);
+  
+  postBody = {
+    "比賽編號" : 3,
+    "直播連結" : "",
+    "報名起始日":"2020-11-13 08:00:00",
+    "截止時間" : "2020-12-13 18:00",
+    "比賽日期" : "2020-12-30",
+    "比賽名稱" : "第3屆室內三鐵挑戰賽",
+    "比賽說明" : "無",
+    "時間範圍" : "08:00~17:00",  
+    "隊數限制" : 5,
+    "團隊人數" : 3,
+    "報名人數" : 12,
+    "比賽種類" : "三人三鐵", 
+    "比賽距離" : "跑步機: 10公里 ,飛輪車: 30公里 ,划船器: 2000公尺",  
+    "學院系所" : [
+                  "1:理學院,1:數學系",
+                  "2:工學院,0:工學院",            
+                  "4:人文社會學院,7:哲學研究所",            
+                  "8:清華學院,2:體育室",            
+                  "11:藝術學院,1:音樂學系"           
+                ]
+  };
+
+  await axios.post('https://ugymtriathlon.azurewebsites.net/api/CreateOrUpdateGame?GameId=3&Code=Debug123', postBody)
+  .then(function (response) {
+    // handle success
+    console.log(JSON.parse(response.data));
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("aaaPOST is done");
 }
 // end of test session ======================
 
@@ -48,6 +99,7 @@ var defineColumns_現行比賽;
 var defineColumns_過往比賽;
 var in管理帳號 = false;
 var 隊數;
+var 原先隊數;
 
 initializaData();
 
@@ -132,7 +184,7 @@ $(document).ready(function() {
       },
       pageSize: 20
     },
-    height: 300,
+    height: 500,
     toolbar: ["search"],
     scrollable: true,
     sortable: true,
@@ -154,7 +206,7 @@ $(document).ready(function() {
       },
       pageSize: 20
     },
-    height: 300,
+    height: 400,
     toolbar: ["search"],
     scrollable: true,
     sortable: true,
@@ -170,16 +222,17 @@ $(document).ready(function() {
 
 //=== Initialization Data =====================
 function initializaData(){
-  //1. TODO: API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
-  最後比賽編號 = 4; //模擬資料
-
-  //模擬 API 讀取 games，延遲 1000ms
-  setTimeout(()=> {games = JSON.parse(gameStr); $("#現行比賽表格").data("kendoGrid").dataSource.success(games);},1000);
-
-  //模擬 API 讀取 gamehistory，延遲 1000ms
-  setTimeout(()=> {gamehistory = JSON.parse(gamehistoryStr); $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);},1000);
-
+  //1. API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
+  //Use API to get 現行比賽
+  $.loading.start('Loading...');
+  get現行比賽(); //2020-10-13 取得比賽資料的學院系所 的 index 為錯誤
+  
+  //Use API to get 過往比賽
+  $.loading.start('Loading...')
+  get過往比賽();
+  
   //Use API to get 學院
+  $.loading.start('Loading...')
   get學院();
 
   //3. 初始現行比賽及過往比賽表格
@@ -191,7 +244,7 @@ function initializaData(){
           比賽名稱: { type: "string" },
           時間範圍: { type: "string" },
           截止時間: { type: "string" },            
-          人數限制: { type: "number" },
+          隊數限制: { type: "number" },
           報名人數: { type: "number" },
           比賽種類: { type: "string" }, 
           比賽距離: { type: "string" },             
@@ -367,6 +420,7 @@ function 回主畫面(){
   $("#新增比賽表格Div").hide();
   $("#院所系管理表單Div").hide();  
   $("#mainPage").show();
+  window.scrollTo(0,0);
 }
 
 //現行比賽的 Edit 按鈕 handler
@@ -423,9 +477,13 @@ function editClick(e) {
   
   //設定隊伍學院系所
   設定隊伍院系所(selectedGame.隊數限制); //先 reset
-  var numGroup = selectedGame.學院系所.length;
+  var 學院系所JSON = JSON.parse(selectedGame.學院系所);//API 傳回的 selectedGame.學院系所 為 JSON string
+  //var numGroup = selectedGame.學院系所.length;
+  var numGroup = 學院系所JSON.length;
+  console.log(學院系所JSON, numGroup);
   for (var i=0; i<numGroup; i++){
-    var 學院系所Arr = selectedGame.學院系所[i].split(',');
+    //var 學院系所Arr = selectedGame.學院系所[i].split(',');
+    var 學院系所Arr = 學院系所JSON[i].split(',');
     var 學院Arr = 學院系所Arr[0].split(':');
     var 系所Arr = 學院系所Arr[1].split(':');    
     
@@ -484,7 +542,7 @@ function 直播link(e) {
   
   console.log(selectedGame);
   
-  //TODO: call API to save the game.
+  //TODO: call API to save the selectedGame.
 }
 
 //過往比賽的 Info 按鈕 handler
@@ -512,7 +570,7 @@ function infoClick(e) {
   var 開始結束 = 時間範圍.split("~");
   $("#開始時間").val(開始結束[0]); //$("#開始時間").prop('disabled', true);
   $("#結束時間").val(開始結束[1]); //$("#結束時間").prop('disabled', true); 
-  $("#參賽隊數").val(selectedGame.隊數限制.toString()); //$("#參賽隊數").prop('disabled', true);
+  $("#參賽隊數").val(selectedGame.隊數限制.toString()); 原先隊數=selectedGame.隊數限制; //$("#參賽隊數").prop('disabled', true);
   $("#"+selectedGame.比賽種類).prop("checked", "checked"); //$("#"+selectedGame.比賽種類).prop("disabled", true); 
   var distStr = selectedGame.比賽距離;
   distArr = distStr.split(",");
@@ -632,13 +690,13 @@ function 新增比賽按鈕click(){
   $("#報名名單").prop("disabled", true);
   $("#比賽結果").prop("disabled", true);
   
-  $("#比賽編號內容").text("--");
+  $("#比賽編號內容").text((最後比賽編號+1).toString());
   $("#比賽名稱內容").text(""); 
   $("#比賽說明內容").text(""); 
   $("#比賽日期").val("");    
   $("#開始時間").val(""); 
   $("#結束時間").val(""); 
-  $("#參賽隊數").val("10"); 
+  $("#參賽隊數").val("10"); 原先隊數=10;
   $("#個人三鐵").prop("checked", "checked");  
   $("#跑步距離").val("");  $("#飛輪距離").val("");  $("#划船距離").val("");
   
@@ -646,6 +704,7 @@ function 新增比賽按鈕click(){
   //預設新增比賽 參賽隊伍 10 隊
   $("#參賽隊數").val("10");
   設定隊伍院系所(10);
+  selectedGame= {隊數限制:10, 學院系所:[]};
   
   $("#新增比賽儲存按鈕").prop("disabled", false);
   
@@ -867,13 +926,133 @@ function ExportClick(index) {
   
 }
 
+function 確定比賽種類() {
+  if ($("#個人三鐵").prop("checked")) return "個人三鐵";
+  if ($("#三人三鐵").prop("checked")) return "三人三鐵";
+  if ($("#三人綜合").prop("checked")) return "三人綜合";
+  if ($("#三人跑步").prop("checked")) return "三人跑步";
+  if ($("#三人飛輪").prop("checked")) return "三人飛輪";
+  if ($("#三人划船").prop("checked")) return "三人划船";  
+  if ($("#個人跑步").prop("checked")) return "個人跑步";
+  if ($("#個人飛輪").prop("checked")) return "個人飛輪";
+  if ($("#個人划船").prop("checked")) return "個人划船";
+}
+
+function 檢查比賽資料完整(){
+  console.log("檢查比賽資料完整");
+  
+  if ($("#比賽名稱內容").val()=="") {
+    alert("比賽名稱不得為空白!")
+    return false;
+  }
+  if ($("#比賽說明內容").val()=="") {
+    alert("比賽說明不得為空白!")
+    return false;
+  }
+  if ($("#比賽日期").val()=="") {
+    alert("比賽日期不得為空白!")
+    return false;
+  }
+  if ($("#開始時間").val()=="") {
+    alert("開始時間不得為空白!")
+    return false;
+  }  
+  if ($("#結束時間").val()=="") {
+    alert("結束時間!")
+    return false;
+  } 
+  if ($("#截止日期").val()=="") {
+    alert("截止日期不得為空白!")
+    return false;
+  }  
+  if ($("#截止時間").val()=="") {
+    alert("截止時間不得為空白!")
+    return false;
+  } 
+  if ($("#跑步距離").val()=="") {
+    alert("跑步距離不得為空白!")
+    return false;
+  }   
+  if ($("#飛輪距離").val()=="") {
+    alert("飛輪距離不得為空白!")
+    return false;
+  } 
+  if ($("#划船距離").val()=="") {
+    alert("划船距離不得為空白!")
+    return false;
+  }   
+
+//  for (var i=1; i < $("#參賽隊數").val()+1; i++){
+//    if ($("#隊伍學院"+i.toString()).prop("selectedIndex")==0) {
+//       alert("隊伍 #"+i.toString()+" 未設定學院!")
+//       return false;
+//    }
+//  }
+  
+  return true;
+}
+
 function saveGame() {
   console.log("saveGame");
   
-  if (gameSaveType=="New") {
-    console.log("Add New Game");
-  } else {
-    console.log("Update a Game");
+  //check data integrity
+  //if (檢查比賽資料完整()==false) return;
+  
+  if (confirm("請確定要儲存比賽!!!")){    
+    if (gameSaveType=="New") {
+      console.log("Add New Game");
+    } else {
+      console.log("Update a Game");
+    }
+    
+    var 比賽距離 = 
+        "跑步機: "+$("#跑步距離").val()+"公里 ,飛輪車: "+$("#飛輪距離").val()+"公里 ,划船器: "+$("#划船距離").val()+"公尺";
+    
+    var 學院系所 = [];
+    for (var i=1; i< parseInt($("#參賽隊數").val())+1; i++) {
+      console.log(i);
+      var 隊伍 = $("#隊伍學院"+i.toString()).prop("selectedIndex").toString()+":" +
+                $("#隊伍學院"+i.toString()).val()+","                            +
+                $("#隊伍系所"+i.toString()).prop("selectedIndex").toString()+":" +
+                $("#隊伍系所"+i.toString()).val();      
+      
+      學院系所.push(隊伍);
+    }
+    
+    var game = {
+        "比賽編號" : $("#比賽編號內容").text(),     
+        "直播連結" : "",    
+        "比賽日期" : $("#比賽日期").val(), 
+        "比賽名稱" : $("#比賽名稱內容").val(), 
+        "比賽說明" : $("#比賽說明內容").val(), 
+        "時間範圍" : $("#開始時間").val()+"~"+$("#結束時間").val(), 
+        "截止時間" : $("#截止日期").val()+" "+$("#截止時間").val(), 
+        "隊數限制" : $("#參賽隊數").val(), 
+        "報名人數" : 0, //若是 edit game, 取現有報名人數 
+        "比賽種類" : 確定比賽種類(),  
+        "比賽距離" : 比賽距離,   
+        "學院系所" : 學院系所
+//                    以下留著做參考      
+//                    ["1:理學院,1:數學系", 
+//                     "2:工學院,0:工學院", 
+//                     "4:人文社會學院,7:哲學研究所", 
+//                     "8:清華學院,2:體育室", 
+//                     "11:藝術學院,1:音樂學系" 
+//                    ] 
+    };
+    
+    console.log(game);
+    
+    //update Kendo table
+    games.push(game);
+    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
+    
+    //API to write to database
+    寫入比賽(最後比賽編號, game);
+    
+    回主畫面();
+    //Everything OK, then update 最後比賽編號
+    最後比賽編號++;
   }
 }
 
@@ -887,17 +1066,19 @@ function 隊數修改() {
   隊數 = parseInt(隊數Str) 
   console.log(隊數);
   
-  if (isNaN(隊數)) {
-    alert("隊數輸入錯誤，請再檢查。");
+  //先暫定隊數上限是 100 隊，避免 performance 受影響
+  if (isNaN(隊數) || 隊數<1 || 隊數>100 ) {
+    alert("隊數輸入錯誤，請再檢查。上限隊數 100");
     return;
   }
 
   //設定隊伍院系所(隊數);
   
-  if (隊數 < selectedGame.隊數限制){
-    setTimeout(function() { //setTimeout 是為了不要讓 alert 擋住前面 $("#參賽隊數").val(隊數Str);
-      if (confirm("比原先設定的隊數減少，有些設定會被清除，請確定!!!")){
+  if (confirm("修改隊數，之前設定會清空，請確定!!!")){
+    if (隊數 < selectedGame.隊數限制){
+      setTimeout(function() { //setTimeout 是為了不要讓 alert 擋住前面 $("#參賽隊數").val(隊數Str);
         設定隊伍院系所(隊數);
+        原先隊數 = 隊數;
         if (selectedGame.學院系所.length>0){
           for (var i=0; i<隊數; i++){
             var 學院系所Arr = selectedGame.學院系所[i].split(',');
@@ -915,28 +1096,33 @@ function 隊數修改() {
             $("#隊伍系所"+(i+1).toString()).val(系所Arr[1]);
           }    
         }
+      }, 10);
+
+    } else {
+      設定隊伍院系所(隊數);
+      原先隊數 = 隊數;
+      try {
+        for (var i=0; i<selectedGame.隊數限制; i++){
+          var 學院系所Arr = selectedGame.學院系所[i].split(',');
+          var 學院Arr = 學院系所Arr[0].split(':');
+          var 系所Arr = 學院系所Arr[1].split(':');    
+
+          console.log(學院Arr[0], 學院Arr[1], 系所Arr[0], 系所Arr[1]);
+
+          $("#隊伍學院"+(i+1).toString()).val(學院Arr[1]);
+
+          $("#系所Option"+(i+1).toString()).remove();
+          所有學院[parseInt(學院Arr[0])].forEach(系所 => {
+            $("#隊伍系所"+(i+1).toString()).append('<option id="系所Option'+(i+1).toString()+'" value="'+系所+'">'+系所+'</option>');    
+          });  
+          $("#隊伍系所"+(i+1).toString()).val(系所Arr[1]);
+        }   
+      } catch (e) {
+        console.log(e);
       }
-    }, 10);
-    
-  } else {
-    設定隊伍院系所(隊數);
-    for (var i=0; i<selectedGame.隊數限制; i++){
-      var 學院系所Arr = selectedGame.學院系所[i].split(',');
-      var 學院Arr = 學院系所Arr[0].split(':');
-      var 系所Arr = 學院系所Arr[1].split(':');    
 
-      console.log(學院Arr[0], 學院Arr[1], 系所Arr[0], 系所Arr[1]);
-
-      $("#隊伍學院"+(i+1).toString()).val(學院Arr[1]);
-
-      $("#系所Option"+(i+1).toString()).remove();
-      所有學院[parseInt(學院Arr[0])].forEach(系所 => {
-        $("#隊伍系所"+(i+1).toString()).append('<option id="系所Option'+(i+1).toString()+'" value="'+系所+'">'+系所+'</option>');    
-      });  
-      $("#隊伍系所"+(i+1).toString()).val(系所Arr[1]);
-    }     
-  }
-  
+    }
+  } else $("#參賽隊數").val(原先隊數);
 }
 
 function validateEmail(mail) {
@@ -993,4 +1179,120 @@ async function get學院() {
   });
   
   console.log("get學院 is done");
+  $.loading.end();
+}
+
+async function get現行比賽() {
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  //console.log(APIKEY);
+  
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllActiveGameStatus?Code='+APIKEY)
+  .then(function (response) {
+    // handle success
+    games = JSON.parse(response.data); 
+    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
+    
+    //find 最後比賽編號
+    最後比賽編號 = -1; 
+    for (var i=0; i< games.length; i++){
+      if ( parseInt(games[i].比賽編號) > 最後比賽編號) 最後比賽編號 = parseInt(games[i].比賽編號);
+    }
+    
+    //console.log(typeof 最後比賽編號, 最後比賽編號);
+    $.loading.end();
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("get現行比賽 is done");
+}
+
+async function get過往比賽() {
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  //console.log(APIKEY);
+  
+  await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllClosedGames?Code='+APIKEY)
+  .then(function (response) {
+    // handle success
+    gamehistory = JSON.parse(response.data);   
+    $("#過往比賽表格").data("kendoGrid").dataSource.success(gamehistory);    
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("get過往比賽 is done");
+  $.loading.end();
+}
+
+async function 寫入比賽(gameId, game) {
+  
+  //檢查 response 的 status
+  //.then(function (response) {
+  // if(response.status == 200){...}
+  
+  
+  var APIKEY;
+  await database.ref('/APIKEY').once('value', e=>{ 
+    APIKEY= e.val();  
+  });
+  console.log(APIKEY);
+  
+  postBody = game;
+//  {
+//    "比賽編號" : 3,
+//    "直播連結" : "",
+//    "報名起始日":"2020-11-13 08:00:00",
+//    "截止時間" : "2020-12-13 18:00",
+//    "比賽日期" : "2020-12-30",
+//    "比賽名稱" : "第3屆室內三鐵挑戰賽",
+//    "比賽說明" : "無",
+//    "時間範圍" : "08:00~17:00",  
+//    "隊數限制" : 5,
+//    "團隊人數" : 3,
+//    "報名人數" : 12,
+//    "比賽種類" : "三人三鐵", 
+//    "比賽距離" : "跑步機: 10公里 ,飛輪車: 30公里 ,划船器: 2000公尺",  
+//    "學院系所" : [
+//                  "1:理學院,1:數學系",
+//                  "2:工學院,0:工學院",            
+//                  "4:人文社會學院,7:哲學研究所",            
+//                  "8:清華學院,2:體育室",            
+//                  "11:藝術學院,1:音樂學系"           
+//                ]
+//  };
+
+  console.log('https://ugymtriathlon.azurewebsites.net/api/CreateOrUpdateGame?Code=Debug123&GameId='+gameId.toString());
+  
+  console.log(postBody);
+  
+  await axios.post('https://ugymtriathlon.azurewebsites.net/api/CreateOrUpdateGame?Code=Debug123&GameId='+gameId.toString(), postBody)
+  .then(function (response) {
+    // handle success
+    console.log(JSON.parse(response.data));
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });
+  
+  console.log("寫入比賽 is done");
 }
