@@ -477,7 +477,10 @@ function editClick(e) {
   
   //設定隊伍學院系所
   設定隊伍院系所(selectedGame.隊數限制); //先 reset
+  
+  //配合 API 傳回學院系所是 JSON string
   var 學院系所JSON = JSON.parse(selectedGame.學院系所);//API 傳回的 selectedGame.學院系所 為 JSON string
+  
   //var numGroup = selectedGame.學院系所.length;
   var numGroup = 學院系所JSON.length;
   console.log(學院系所JSON, numGroup);
@@ -738,10 +741,78 @@ function 報名名單click(){
     console.loge(e);
   }
 
+  
+  //get the index of the game
+  var gameIndex=-1;
+  for (var i=0; i< games.length; i++){
+    if (games[i].比賽編號 == 比賽編號) {
+      gameIndex = i;
+      break;
+    }
+  }
+  
+  //TODO: API 用 比賽編號 get 報名名單，先用模擬資料
+  var 報名名單 = Object.assign({}, 報名名單2);  
+  
+  "<div class='報名名單標題'>"+編號及名稱+"</div>"
+  var 編號及名稱 = "<div class='報名名單標題'>" +
+                    "<span style='width:250px; display:inline-block;'> 比賽編號: "+games[gameIndex].比賽編號+"</span>" +
+                    "<span> 比賽名稱: "+games[gameIndex].比賽名稱+"</span>" +
+                 "</div>";
+  
+  var 種類及隊數 = "<div class='報名名單標題'>" +
+                    "<span style='width:250px; display:inline-block;'> 比賽種類: "+games[gameIndex].比賽種類+"</span>" +
+                    "<span> 比賽隊數: "+games[gameIndex].隊數限制+"</span>" +
+                 "</div>";
+  
+  console.log(gameIndex);
   //append 新的資料
   $("#報名名單內容").append("<div id='報名名單內容細節'>");
-  $("#報名名單內容細節").append("尚未實作:比賽編號-"+比賽編號.toString()); // For test  
+  $("#報名名單內容細節").append(編號及名稱);     
+  $("#報名名單內容細節").append(種類及隊數);  
   $("#報名名單內容").append("</div>");
+  
+
+  for (var i=1; i<games[gameIndex].隊數限制+1; i++){
+    var teamNumStr = "T"+i.toString();
+    var 隊伍標頭Str = 報名名單.隊伍[teamNumStr].學院系所;
+    var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);
+
+    var 第幾隊 = "第 "+i.toString()+" 隊:";
+    var 隊伍學院系所 = 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
+    var 隊伍標頭 = "<br><hr><div class='報名名單標題'>" +
+                      "<span style='width:250px; display:inline-block;'>"+第幾隊+"</span>" +
+                      "<span> 學院系所: "+隊伍學院系所+"</span>" +
+                   "</div>";
+
+    $("#報名名單內容細節").append(隊伍標頭);  
+
+    var 隊伍人數 = Object.keys(報名名單.隊伍[teamNumStr].報名者).length;
+    //console.log(隊伍人數);
+    var 隊伍報名="";
+    var 轉換=['一','二','三'];
+    for (var j=0; j< 隊伍人數; j++){
+      var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者["第"+轉換[j]+"位"];
+      隊伍報名 += (
+        隊伍報名Str.運動 + ":" + 
+        ((隊伍報名Str.姓名=="")?"<span style='font-weight:bold;color:red'>尚未報名</span>":隊伍報名Str.姓名) + ", ");
+    }  
+
+    var 報名標頭 = "<div class='報名名單標題'>" +
+                      "<a style='font-size:10px; color:red' onclick='取消報名("+i.toString()+")'> 取消報名 </a>" +
+                      "<span style='width:200px; display:inline-block;'></span>" +
+                      "<span> "+隊伍報名+"</span>" +
+                   "</div>";  
+
+    $("#報名名單內容細節").append(報名標頭); 
+  }
+  
+  $("#報名名單內容細節").append("<br><hr><br>");  
+  
+}
+
+function 取消報名(index){
+  console.log("取消報名",index);
 }
 
 function 比賽結果click(){
@@ -917,14 +988,96 @@ function remove隊伍院系所(){
 function ExportClick(index) {
   console.log("Export", index);
   
+  //TODO: API 用 比賽編號 get 報名名單，先用模擬資料
+  var 報名名單 = Object.assign({}, 報名名單2);
+  
+  //get the index of the game
+  var gameIndex=-1;
+  for (var i=0; i< games.length; i++){
+    if (games[i].比賽編號 == 比賽編號) {
+      gameIndex = i;
+      break;
+    }
+  }  
+  
   var str ="";
-  if (index==2) str = "報名名單";
-  if (index==3) str = "比賽結果";  
+  if (index==2) {
+    str = "報名名單";
+    strToSave = 
+      "報名名單:\r\n" +
+      "比賽編號:" + games[gameIndex].比賽編號 + "," +
+      "比賽名稱:" + games[gameIndex].比賽名稱 + "\r\n" +
+      "比賽種類:" + games[gameIndex].比賽種類 + "," +
+      "比賽隊數:" + games[gameIndex].隊數限制 + "\r\n";
+    
+      for (var i=1; i<games[gameIndex].隊數限制+1; i++){
+        var teamNumStr = "T"+i.toString();
+        var 隊伍標頭Str = 報名名單.隊伍[teamNumStr].學院系所;
+        var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);
 
-  var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
-  saveAs(blob, str+"_export.txt")
+        var 第幾隊 = "第 "+i.toString()+" 隊";
+        var 隊伍學院系所 = 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
+        
+        strToSave += (第幾隊 + "," + 隊伍學院系所);  
+
+        var 隊伍人數 = Object.keys(報名名單.隊伍[teamNumStr].報名者).length;
+        //console.log(隊伍人數);
+        var 隊伍報名="";
+        var 轉換=['一','二','三'];
+        for (var j=0; j< 隊伍人數; j++){
+          var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者["第"+轉換[j]+"位"];
+          隊伍報名 += (
+             "," + 隊伍報名Str.運動 + ":" + 
+            ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名));
+        }  
+
+        strToSave += 隊伍報名 + "\r\n";
+      }       
+          
+  }
+  
+  if (index==3) {
+    str = "比賽結果";  
+  }
+
+  var blob = new Blob([strToSave], {type: "text/plain;charset=utf-8"});
+  saveAs(blob, str+"export.txt")
   
 }
+  
+
+//  for (var i=1; i<games[gameIndex].隊數限制+1; i++){
+//    var teamNumStr = "T"+i.toString();
+//    var 隊伍標頭Str = 報名名單2.隊伍[teamNumStr].學院系所;
+//    var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);
+//
+//    var 第幾隊 = "第 "+i.toString()+" 隊:";
+//    var 隊伍學院系所 = 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
+//    var 隊伍標頭 = "<br><hr><div class='報名名單標題'>" +
+//                      "<span style='width:250px; display:inline-block;'>"+第幾隊+"</span>" +
+//                      "<span> 學院系所: "+隊伍學院系所+"</span>" +
+//                   "</div>";
+//
+//    $("#報名名單內容細節").append(隊伍標頭);  
+//
+//    var 隊伍人數 = Object.keys(報名名單2.隊伍[teamNumStr].報名者).length;
+//    console.log(隊伍人數);
+//    var 隊伍報名="";
+//    var 轉換=['一','二','三'];
+//    for (var j=0; j< 隊伍人數; j++){
+//      var 隊伍報名Str = 報名名單2.隊伍[teamNumStr].報名者["第"+轉換[j]+"位"];
+//      隊伍報名 += (
+//        隊伍報名Str.運動 + ":" + 
+//        ((隊伍報名Str.姓名=="")?"<span style='font-weight:bold;color:red'>尚未報名</span>":隊伍報名Str.姓名) + ", ");
+//    }  
+//
+//    var 報名標頭 = "<div class='報名名單標題'>" +
+//                      "<span style='width:250px; display:inline-block;'></span>" +
+//                      "<span> "+隊伍報名+"</span>" +
+//                   "</div>";  
+//
+//    $("#報名名單內容細節").append(報名標頭); 
+//  }  
 
 function 確定比賽種類() {
   if ($("#個人三鐵").prop("checked")) return "個人三鐵";
@@ -999,11 +1152,7 @@ function saveGame() {
   //if (檢查比賽資料完整()==false) return;
   
   if (confirm("請確定要儲存比賽!!!")){    
-    if (gameSaveType=="New") {
-      console.log("Add New Game");
-    } else {
-      console.log("Update a Game");
-    }
+
     
     var 比賽距離 = 
         "跑步機: "+$("#跑步距離").val()+"公里 ,飛輪車: "+$("#飛輪距離").val()+"公里 ,划船器: "+$("#划船距離").val()+"公尺";
@@ -1042,13 +1191,32 @@ function saveGame() {
     };
     
     console.log(game);
-    
-    //update Kendo table
-    games.push(game);
-    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
-    
+        
     //API to write to database
-    寫入比賽(最後比賽編號, game);
+    寫入比賽(game);
+    
+    //update Kendo table, 使用 game1 來配合 API 傳回學院系所是 JSON string
+    
+    var game1;
+    game1 = Object.assign({}, game);
+    game1.學院系所 = JSON.stringify( game1.學院系所);    
+    if (gameSaveType=="New") {
+      console.log("Add New Game");
+      games.push(game1);
+    } else {
+      //replace the gameRecord
+      console.log("Update a Game");
+      
+      for (var i=0; i< games.length; i++) {
+        if (games[i].比賽編號 == game.比賽編號) {
+          console.log("find gameId", game.比賽編號, i);
+          games[i]=game;
+          break;
+        }
+      };
+    }
+    
+    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);    
     
     回主畫面();
     //Everything OK, then update 最後比賽編號
@@ -1147,11 +1315,18 @@ function validatePassword(password) {
 
 async function get學院() {
   var APIKEY;
-  await database.ref('/APIKEY').once('value', e=>{ 
-    APIKEY= e.val();  
-  });
-  //console.log(APIKEY);
+  try {
+    await database.ref('/APIKEY').once('value', e=>{ 
+      APIKEY= e.val();  
+    });
+  } catch (e) {
+    console.log(e); 
+    $.loading.end();
+    return;
+  }
   
+  //console.log(APIKEY);
+    
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllSchoolUnits?Code='+APIKEY)
   .then(function (response) {
     // handle success
@@ -1184,9 +1359,16 @@ async function get學院() {
 
 async function get現行比賽() {
   var APIKEY;
-  await database.ref('/APIKEY').once('value', e=>{ 
-    APIKEY= e.val();  
-  });
+  try {
+    await database.ref('/APIKEY').once('value', e=>{ 
+      APIKEY= e.val();  
+    });
+  } catch (e) {
+    console.log(e); 
+    $.loading.end();
+    return;
+  }
+  
   //console.log(APIKEY);
   
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllActiveGameStatus?Code='+APIKEY)
@@ -1212,14 +1394,27 @@ async function get現行比賽() {
     // always executed
   });
   
+  games.forEach(function (game){
+    if (!game.學院系所) {
+      game.學院系所 = "[]";
+    } 
+  });
+  
   console.log("get現行比賽 is done");
 }
 
 async function get過往比賽() {
   var APIKEY;
-  await database.ref('/APIKEY').once('value', e=>{ 
-    APIKEY= e.val();  
-  });
+  try {
+    await database.ref('/APIKEY').once('value', e=>{ 
+      APIKEY= e.val();  
+    });
+  } catch (e) {
+    console.log(e); 
+    $.loading.end();
+    return;
+  }
+  
   //console.log(APIKEY);
   
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllClosedGames?Code='+APIKEY)
@@ -1240,7 +1435,7 @@ async function get過往比賽() {
   $.loading.end();
 }
 
-async function 寫入比賽(gameId, game) {
+async function 寫入比賽(game) {
   
   //檢查 response 的 status
   //.then(function (response) {
@@ -1253,6 +1448,7 @@ async function 寫入比賽(gameId, game) {
   });
   console.log(APIKEY);
   
+  var gameId = game.比賽編號.toString();
   postBody = game;
 //  {
 //    "比賽編號" : 3,
@@ -1281,7 +1477,7 @@ async function 寫入比賽(gameId, game) {
   
   console.log(postBody);
   
-  await axios.post('https://ugymtriathlon.azurewebsites.net/api/CreateOrUpdateGame?Code=Debug123&GameId='+gameId.toString(), postBody)
+  await axios.post('https://ugymtriathlon.azurewebsites.net/api/CreateOrUpdateGame?Code=Debug123&GameId='+gameId, postBody)
   .then(function (response) {
     // handle success
     console.log(JSON.parse(response.data));
