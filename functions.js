@@ -100,6 +100,7 @@ var defineColumns_過往比賽;
 var in管理帳號 = false;
 var 隊數;
 var 原先隊數;
+var 比賽編號位數=5;
 
 initializaData();
 
@@ -170,6 +171,8 @@ firebase.auth().onAuthStateChanged(async function(user) {
 
 $(document).ready(function() {
   
+  $(".回主畫面").hover(function() {$(this).css('cursor','pointer');});
+  
   $("#新增比賽表格Div").hide();
   $("#院所系管理表單Div").hide(); 
   $("#比賽資訊").css("background", "orange");$("#比賽資訊").css("color", "white");  
@@ -225,7 +228,7 @@ function initializaData(){
   //1. API 讀取 Database，取得 現行比賽 過往比賽 所有學院, 
   //Use API to get 現行比賽
   $.loading.start('Loading...');
-  get現行比賽(); //2020-10-13 取得比賽資料的學院系所 的 index 為錯誤
+  get現行比賽(); 
   
   //Use API to get 過往比賽
   $.loading.start('Loading...')
@@ -410,7 +413,7 @@ function 學院Selected(學院){
 //  }); 
   $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[學院Idx][0]+'</div>');
   for (var i=1; i< 所有學院[1].length; i++) {
-    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[學院Idx][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+    $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[學院Idx][i]+' <a style="font-size:5px; color:red; cursor:pointer" onclick="delete系所('+i.toString()+')"> delete </a></div>');
   }  
   
 }
@@ -445,7 +448,7 @@ function editClick(e) {
   );
   
   console.log(selectedGame);
-  比賽編號 = selectedGame.比賽編號;
+  比賽編號 = parseInt(selectedGame.比賽編號);
   $("#比賽編號內容").text(比賽編號.toString());
   $("#比賽名稱內容").text(selectedGame.比賽名稱);
   $("#比賽說明內容").text(selectedGame.比賽說明);
@@ -479,7 +482,8 @@ function editClick(e) {
   設定隊伍院系所(selectedGame.隊數限制); //先 reset
   
   //配合 API 傳回學院系所是 JSON string
-  var 學院系所JSON = JSON.parse(selectedGame.學院系所);//API 傳回的 selectedGame.學院系所 為 JSON string
+  //var 學院系所JSON = JSON.parse(selectedGame.學院系所);//API 傳回的 selectedGame.學院系所 為 JSON string
+  var 學院系所JSON = selectedGame.學院系所; //已修正 API 傳回的 selectedGame.學院系所 為 object
   
   //var numGroup = selectedGame.學院系所.length;
   var numGroup = 學院系所JSON.length;
@@ -799,7 +803,7 @@ function 報名名單click(){
     }  
 
     var 報名標頭 = "<div class='報名名單標題'>" +
-                      "<a style='font-size:10px; color:red' onclick='取消報名("+i.toString()+")'> 取消報名 </a>" +
+                      "<a style='font-size:10px; color:red; cursor:pointer' onclick='取消報名("+i.toString()+")'> 取消報名 </a>" +
                       "<span style='width:200px; display:inline-block;'></span>" +
                       "<span> "+隊伍報名+"</span>" +
                    "</div>";  
@@ -1098,10 +1102,10 @@ function 檢查比賽資料完整(){
     alert("比賽名稱不得為空白!")
     return false;
   }
-  if ($("#比賽說明內容").val()=="") {
-    alert("比賽說明不得為空白!")
-    return false;
-  }
+//  if ($("#比賽說明內容").val()=="") {
+//    alert("比賽說明不得為空白!")
+//    return false;
+//  }
   if ($("#比賽日期").val()=="") {
     alert("比賽日期不得為空白!")
     return false;
@@ -1123,16 +1127,19 @@ function 檢查比賽資料完整(){
     return false;
   } 
   if ($("#跑步距離").val()=="") {
-    alert("跑步距離不得為空白!")
-    return false;
+    //alert("跑步距離不得為空白!")
+    $("#跑步距離").val("0");
+    //return false;
   }   
   if ($("#飛輪距離").val()=="") {
-    alert("飛輪距離不得為空白!")
-    return false;
+    //alert("飛輪距離不得為空白!")
+    $("#飛輪距離").val("0");
+    //return false;
   } 
   if ($("#划船距離").val()=="") {
-    alert("划船距離不得為空白!")
-    return false;
+    //alert("划船距離不得為空白!")
+    $("#划船距離").val("0");
+    //return false;
   }   
 
 //  for (var i=1; i < $("#參賽隊數").val()+1; i++){
@@ -1149,13 +1156,14 @@ function saveGame() {
   console.log("saveGame");
   
   //check data integrity
-  //if (檢查比賽資料完整()==false) return;
+  if (檢查比賽資料完整()==false) return;
   
   if (confirm("請確定要儲存比賽!!!")){    
 
     
     var 比賽距離 = 
         "跑步機: "+$("#跑步距離").val()+"公里 ,飛輪車: "+$("#飛輪距離").val()+"公里 ,划船器: "+$("#划船距離").val()+"公尺";
+    console.log(比賽距離);
     
     var 學院系所 = [];
     for (var i=1; i< parseInt($("#參賽隊數").val())+1; i++) {
@@ -1195,22 +1203,38 @@ function saveGame() {
     //API to write to database
     寫入比賽(game);
     
-    //update Kendo table, 使用 game1 來配合 API 傳回學院系所是 JSON string
     
-    var game1;
-    game1 = Object.assign({}, game);
-    game1.學院系所 = JSON.stringify( game1.學院系所);    
+    
+    //update Kendo table, 
+    
+    //使用 game1 來配合 API 傳回學院系所是 JSON string
+    //API 傳回學院系所修正為 Object，不用 game1
+    //var game1;
+    //game1 = Object.assign({}, game);
+    //game1.學院系所 = JSON.stringify( game1.學院系所); 
+    
     if (gameSaveType=="New") {
       console.log("Add New Game");
-      games.push(game1);
+      
+      var gameWithDigits = Object.assign({}, game);
+      var heading0s="";
+      for (var i=0; i < (比賽編號位數 - gameWithDigits.比賽編號.length); i++) {
+        heading0s += "0";
+      }
+      gameWithDigits.比賽編號 = heading0s + gameWithDigits.比賽編號;
+      games.push(gameWithDigits);
+      
     } else {
+      
       //replace the gameRecord
       console.log("Update a Game");
       
       for (var i=0; i< games.length; i++) {
-        if (games[i].比賽編號 == game.比賽編號) {
+        if (parseInt(games[i].比賽編號) == parseInt(game.比賽編號)) {
           console.log("find gameId", game.比賽編號, i);
+          var temp = games[i].比賽編號;
           games[i]=game;
+          games[i].比賽編號 = temp;
           break;
         }
       };
@@ -1219,8 +1243,6 @@ function saveGame() {
     $("#現行比賽表格").data("kendoGrid").dataSource.success(games);    
     
     回主畫面();
-    //Everything OK, then update 最後比賽編號
-    最後比賽編號++;
   }
 }
 
@@ -1341,7 +1363,7 @@ async function get學院() {
 
     $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][0]+'</div>');
     for (var i=1; i< 所有學院[1].length; i++) {
-      $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red" onclick="delete系所('+i.toString()+')"> delete </a></div>');
+      $("#所系List").append('<div id="系所List" class="系所List內容">'+所有學院[1][i]+' <a style="font-size:5px; color:red; cursor:pointer" onclick="delete系所('+i.toString()+')"> delete </a></div>');
     }  
  
   })
@@ -1370,20 +1392,30 @@ async function get現行比賽() {
   }
   
   //console.log(APIKEY);
-  
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllActiveGameStatus?Code='+APIKEY)
   .then(function (response) {
     // handle success
-    games = JSON.parse(response.data); 
-    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
+    games = JSON.parse(response.data);
+    
+    //$("#現行比賽表格").data("kendoGrid").dataSource.success(games);
+
+    //調整比賽編號為 4 位數
+    for (var i=0; i< games.length; i++){ 
+      var heading0s ="";
+      for (var j=0; j < (比賽編號位數 - games[i].比賽編號.toString().length); j++){
+        heading0s+="0";
+      }
+      games[i].比賽編號 = heading0s+games[i].比賽編號.toString();
+    }    
     
     //find 最後比賽編號
     最後比賽編號 = -1; 
-    for (var i=0; i< games.length; i++){
+    for (var i=0; i< games.length; i++){    
       if ( parseInt(games[i].比賽編號) > 最後比賽編號) 最後比賽編號 = parseInt(games[i].比賽編號);
     }
     
-    //console.log(typeof 最後比賽編號, 最後比賽編號);
+    $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
+
     $.loading.end();
   })
   .catch(function (error) {
@@ -1481,10 +1513,14 @@ async function 寫入比賽(game) {
   .then(function (response) {
     // handle success
     console.log(JSON.parse(response.data));
+    if (gameSaveType=="New") 最後比賽編號++;
   })
   .catch(function (error) {
     // handle error
     console.log(error);
+    alert("寫入資料庫錯誤!");
+    window.scrollTo(0,0);
+    location.reload();
   })
   .then(function () {
     // always executed
