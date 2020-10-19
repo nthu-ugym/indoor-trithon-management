@@ -82,7 +82,7 @@ async function aaaPOST() {
 }
 // end of test session ======================
 
-$("#版本").text("V0.55");
+$("#版本").text("V0.6");
 
 // 初始變數
 var 已登入 = -1; // -1:未登入, 0:登入中, 1:已登入
@@ -221,6 +221,50 @@ $(document).ready(function() {
     columns: defineColumns_過往比賽
   });  
 
+  //實體化報名名單表格
+  $("#報名名單表格").kendoGrid({
+    dataSource: {
+      data: games,
+      sort: { field: "比賽編號", dir:"desc"},
+      schema: {
+        model: schemaModel
+      },
+      pageSize: 20
+    },
+    height: 400,
+    toolbar: ["search"],
+    scrollable: true,
+    sortable: true,
+    filterable: false,
+    pageable: {
+      input: true,
+      numeric: false
+    },
+    columns: defineColumns_報名名單
+  });  
+  
+  //實體化比賽結果表格
+  $("#比賽結果表格").kendoGrid({
+    dataSource: {
+      data: games,
+      sort: { field: "比賽編號", dir:"desc"},
+      schema: {
+        model: schemaModel
+      },
+      pageSize: 20
+    },
+    height: 400,
+    toolbar: ["search"],
+    scrollable: true,
+    sortable: true,
+    filterable: false,
+    pageable: {
+      input: true,
+      numeric: false
+    },
+    columns: defineColumns_比賽結果
+  });  
+  
 });
 
 //=== Initialization Data =====================
@@ -374,6 +418,133 @@ function initializaData(){
       width:"50px",        
     }
   ];
+  
+  //比賽表格的 欄位 定義
+  defineColumns_報名名單 = [
+    {
+      field: "比賽編號",
+      title: "編號",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      width: "70px"
+    },  
+    {
+      field: "比賽名稱",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      //width: "230px"
+    },  
+    {
+      field: "比賽日期",
+      //format: "{0:MM/dd/yyyy}",
+      //format: "{0:yyyy-MM-dd}",
+      title: "比賽日期",
+      width: "100px",
+    },
+    {
+      field: "時間範圍",
+      title: "比賽時間",
+      width: "100px"
+    },
+    {
+      field: "截止時間",
+      title: "報名截止時間",
+      width: "120px"
+    },
+    {
+      field: "隊數限制",
+      //title: "人數限制",
+      width: "75px"
+    },
+    {
+      field: "報名人數",
+      //title: "報名人數",
+      width: "75px"
+    },      
+    {
+      field: "比賽種類",
+      //title: "比賽種類",
+      width: "100px"
+    },
+    {
+      field: "比賽距離",
+      //title: "比賽距離",
+      width: "130px"
+    },                  
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
+      width:"50px",        
+    },
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
+      width:"50px",        
+    }  
+  ];  
+  
+defineColumns_比賽結果 = [
+    {
+      field: "比賽編號",
+      title: "編號",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      width: "70px"
+    },  
+    {
+      field: "比賽名稱",
+      //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
+      //width: "230px"
+    },  
+    {
+      field: "比賽日期",
+      //format: "{0:MM/dd/yyyy}",
+      //format: "{0:yyyy-MM-dd}",
+      title: "比賽日期",
+      width: "100px",
+    },
+    {
+      field: "時間範圍",
+      title: "比賽時間",
+      width: "100px"
+    },
+    {
+      field: "截止時間",
+      title: "報名截止時間",
+      width: "120px"
+    },
+    {
+      field: "隊數限制",
+      //title: "人數限制",
+      width: "75px"
+    },
+    {
+      field: "報名人數",
+      //title: "報名人數",
+      width: "75px"
+    },      
+    {
+      field: "比賽種類",
+      //title: "比賽種類",
+      width: "100px"
+    },
+    {
+      field: "比賽距離",
+      //title: "比賽距離",
+      width: "130px"
+    },                  
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
+      width:"50px",        
+    },
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
+      width:"50px",        
+    }  
+  ];    
 }
 
 function 更改學院(selectObject){
@@ -755,6 +926,9 @@ function 報名名單click(){
     }
   }
   
+  $("#報名名單比賽編號內容").text(parseInt(games[gameIndex].比賽編號));
+  $("#報名名單比賽名稱內容").text(games[gameIndex].比賽名稱);
+  
   //TODO: API 用 比賽編號 get 報名名單，先用模擬資料
   var 報名名單 = Object.assign({}, 報名名單2);  
   
@@ -769,7 +943,10 @@ function 報名名單click(){
                     "<span> 比賽隊數: "+games[gameIndex].隊數限制+"</span>" +
                  "</div>";
   
-  console.log(gameIndex);
+  console.log("報名名單", gameIndex);
+  $("#報名名單表格").data("kendoGrid").dataSource.success(games);
+  
+  
   //append 新的資料
   $("#報名名單內容").append("<div id='報名名單內容細節'>");
   $("#報名名單內容細節").append(編號及名稱);     
@@ -835,6 +1012,20 @@ function 比賽結果click(){
     console.loge(e);
   }
   
+  //get the index of the game
+  var gameIndex=-1;
+  for (var i=0; i< games.length; i++){
+    if (games[i].比賽編號 == 比賽編號) {
+      gameIndex = i;
+      break;
+    }
+  }
+  
+  $("#比賽結果比賽編號內容").text(parseInt(games[gameIndex].比賽編號));
+  $("#比賽結果比賽名稱內容").text(games[gameIndex].比賽名稱);  
+  
+  console.log("比賽結果", gameIndex);
+  $("#比賽結果表格").data("kendoGrid").dataSource.success(games);  
   //append 新的資料
   $("#比賽結果內容").append("<div id='比賽結果內容細節'>");
   $("#比賽結果內容細節").append("尚未實作:比賽編號-"+比賽編號.toString()); // For test  
