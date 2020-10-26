@@ -432,15 +432,15 @@ function initializaData(){
       width: "230px"
     },  
     {
-      field: "第一位",
+      field: "No1",
       width: "100px",
     },
     {
-      field: "第二位",
+      field: "No2",
       width: "100px"
     },
     {
-      field: "第三位",
+      field: "No3",
       width: "100px"
     },                  
     {
@@ -453,65 +453,27 @@ function initializaData(){
   
 defineColumns_比賽結果 = [
     {
-      field: "比賽編號",
-      title: "編號",
+      field: "隊伍編號",
       //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
       width: "70px"
     },  
     {
-      field: "比賽名稱",
+      field: "學院所系",
       //template: "<div><a> #: 比賽名稱 # </a><br>aaa</div>",
-      //width: "230px"
+      width: "230px"
     },  
     {
-      field: "比賽日期",
-      //format: "{0:MM/dd/yyyy}",
-      //format: "{0:yyyy-MM-dd}",
-      title: "比賽日期",
+      field: "No1",
       width: "100px",
     },
     {
-      field: "時間範圍",
-      title: "比賽時間",
+      field: "No2",
       width: "100px"
     },
     {
-      field: "截止時間",
-      title: "報名截止時間",
-      width: "120px"
-    },
-    {
-      field: "隊數限制",
-      //title: "人數限制",
-      width: "75px"
-    },
-    {
-      field: "報名人數",
-      //title: "報名人數",
-      width: "75px"
-    },      
-    {
-      field: "比賽種類",
-      //title: "比賽種類",
+      field: "No3",
       width: "100px"
-    },
-    {
-      field: "比賽距離",
-      //title: "比賽距離",
-      width: "130px"
-    },                  
-    {
-      field: "比賽名稱",
-      title: " ",
-      template: "<div onclick='editClick(this)'><i title='Edit Game' style='font-size:20px' class='fa fa-pencil-square-o'></i></div>",
-      width:"50px",        
-    },
-    {
-      field: "比賽名稱",
-      title: " ",
-      template: "<div onclick='直播link(this)'><i style='font-size:20px' class='fa fa-youtube-play'></i></div>",
-      width:"50px",        
-    }  
+    } 
   ];    
 }
 
@@ -906,16 +868,16 @@ function 報名名單click(){
   //  {
   //    隊伍編號:"第 1 隊",
   //    學院所系:"理學院 - 數學系",
-  //    第一位: "跑步: AA1",
-  //    第二位: "飛輪: BB1",
-  //    第三位: "划船: CC1",      
+  //    No1: "跑步: AA1",
+  //    No2: "飛輪: BB1",
+  //    No3: "划船: CC1",      
   //  },
   //  {
   //    隊伍編號:"第 2 隊",
   //    學院所系:"工學院 - 工學院",
-  //    第一位: "跑步: AA2",
-  //    第二位: "飛輪: BB2",
-  //    第三位: "划船: CC2",      
+  //    No1: "跑步: AA2",
+  //    No2: "飛輪: BB2",
+  //    No3: "划船: CC2",      
   //  }    
   //];
   
@@ -934,8 +896,9 @@ function 報名名單click(){
     //console.log(隊伍人數);
     var 隊伍報名="";
     var 轉換=['一','二','三'];
-    for (var j=0; j< 隊伍人數; j++){
-      var 人員 = "第"+轉換[j]+"位";
+    for (var j=1; j< 隊伍人數+1; j++){
+//      var 人員 = "第"+轉換[j]+"位";
+      var 人員 = "No"+j.toString();
       var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者[人員];
       
       報名record[人員]= 隊伍報名Str.運動 + ":" + ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名);     
@@ -965,6 +928,11 @@ function 取消報名(e){
   var 報名名單表格 = $("#報名名單表格").data("kendoGrid");
   var dataItem = 報名名單表格.dataItem($(e).closest("tr"));
   console.log(dataItem.隊伍Id);
+}
+
+function 隊伍轉換(隊伍){
+  var numberStr = 隊伍.substr(1);
+  return "第 "+ 隊伍.substr(1) + " 隊";
 }
 
 function 比賽結果click(){
@@ -997,41 +965,46 @@ function 比賽結果click(){
   
   console.log("比賽結果", gameIndex);
   
-//  //TODO: API 用 比賽編號 get 報名名單，先用模擬資料
-//  var 比賽結果 = Object.assign({}, 比賽結果2);  
-//  
-//  console.log("比賽結果", gameIndex);
-//  var selectedGame比賽結果 =[];
-//  
-//  for (var i=1; i<games[gameIndex].隊數限制+1; i++){
-//    var 比賽結果record={};
-//    
-//    比賽結果record["隊伍Id"]= i;    
-//    比賽結果record["隊伍編號"]= "第 "+i.toString()+" 隊";
-//    
-//    var teamNumStr = "T"+i.toString();
-//    var 隊伍標頭Str = 報名名單.隊伍[teamNumStr].學院系所;
-//    var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);   
-//    報名record["學院所系"]= 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
-//
-//    var 隊伍人數 = Object.keys(報名名單.隊伍[teamNumStr].報名者).length;
-//    //console.log(隊伍人數);
-//    var 隊伍報名="";
-//    var 轉換=['一','二','三'];
-//    for (var j=0; j< 隊伍人數; j++){
-//      var 人員 = "第"+轉換[j]+"位";
-//      var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者[人員];
-//      
-//      報名record[人員]= 隊伍報名Str.運動 + ":" + ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名);     
-//    } 
-//    selectedGame報名名單.push(報名record);
-//    
-//  }
-//  
-//  //console.log(selectedGame報名名單);
-//  
+  //TODO: API 用 比賽編號 get 比賽結果，先用模擬資料
+  var 比賽結果 = Object.assign({}, 比賽結果2);  
+  
+  //console.log("比賽結果", gameIndex);
+  
+  var 名次成績 =
+      "<br><b>&nbsp &nbsp 第一名: </b>"+ 隊伍轉換(比賽結果.第一名.隊伍) + " 成績: " + 比賽結果.第一名.成績 +
+      "<br><b>&nbsp &nbsp 第二名: </b>"+ 隊伍轉換(比賽結果.第二名.隊伍) + " 成績: " + 比賽結果.第二名.成績 +
+      "<br><b>&nbsp &nbsp 第三名: </b>"+ 隊伍轉換(比賽結果.第三名.隊伍) + " 成績: " + 比賽結果.第三名.成績;
+  
+  $("#比賽結果比賽名次內容").append(名次成績); //用 append 是為了容易改變顯示格式
+  
+  var selectedGame比賽結果 =[];
+  
+  for (var i=1; i<games[gameIndex].隊數限制+1; i++){
+    var 比賽結果record={};
+    
+    比賽結果record["隊伍Id"]= i;    
+    比賽結果record["隊伍編號"]= "第 "+i.toString()+" 隊";
+    
+    var teamNumStr = "T"+i.toString();
+    var 隊伍標頭Str = 比賽結果.隊伍[teamNumStr].學院系所;
+    var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);   
+    比賽結果record["學院所系"]= 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
 
-  $("#比賽結果表格").data("kendoGrid").dataSource.success([]);  
+    var 隊伍人數 = Object.keys(比賽結果.隊伍[teamNumStr].報名者).length;
+    //console.log(隊伍人數);
+    var 隊伍報名="";
+    for (var j=1; j< 隊伍人數+1; j++){
+      var 人員 = "No"+j.toString();
+      var 隊伍報名Str = 比賽結果.隊伍[teamNumStr].報名者[人員];
+      
+      比賽結果record[人員]= 隊伍報名Str.運動 + ":" + ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名) + 
+                          ", 成績: " + 隊伍報名Str.成績 ;     
+    } 
+    selectedGame比賽結果.push(比賽結果record);
+    
+  }  
+
+  $("#比賽結果表格").data("kendoGrid").dataSource.success(selectedGame比賽結果);  
   
 
 }
