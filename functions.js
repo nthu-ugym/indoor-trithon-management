@@ -1162,6 +1162,7 @@ function ExportClick(index) {
   
   //TODO: API 用 比賽編號 get 報名名單，先用模擬資料
   var 報名名單 = Object.assign({}, 報名名單2);
+  var 比賽結果 = Object.assign({}, 比賽結果2);
   
   //get the index of the game
   var gameIndex=-1;
@@ -1172,9 +1173,9 @@ function ExportClick(index) {
     }
   }  
   
-  var str ="";
+  var filenamePreStr ="";
   if (index==2) {
-    str = "報名名單";
+    filenamePreStr = "報名名單";
     strToSave = 
       "報名名單:\r\n" +
       "比賽編號:" + games[gameIndex].比賽編號 + "," +
@@ -1195,9 +1196,9 @@ function ExportClick(index) {
         var 隊伍人數 = Object.keys(報名名單.隊伍[teamNumStr].報名者).length;
         //console.log(隊伍人數);
         var 隊伍報名="";
-        var 轉換=['一','二','三'];
-        for (var j=0; j< 隊伍人數; j++){
-          var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者["第"+轉換[j]+"位"];
+        for (var j=1; j< 隊伍人數+1; j++){
+          var 隊伍報名Str = 報名名單.隊伍[teamNumStr].報名者["No"+j.toString()];
+          console.log(隊伍報名Str);
           隊伍報名 += (
              "," + 隊伍報名Str.運動 + ":" + 
             ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名));
@@ -1209,11 +1210,46 @@ function ExportClick(index) {
   }
   
   if (index==3) {
-    str = "比賽結果";  
+    filenamePreStr = "比賽結果";  
+    strToSave = 
+      "比賽結果:\r\n" +
+      "比賽編號:" + games[gameIndex].比賽編號 + "," +
+      "比賽名稱:" + games[gameIndex].比賽名稱 + "\r\n" +
+      "比賽種類:" + games[gameIndex].比賽種類 + "," +
+      "比賽隊數:" + games[gameIndex].隊數限制 + "\r\n" +
+      "比賽名次:\r\n" +
+      "第一名:"+比賽結果.第一名.隊伍+",學院系所:"+比賽結果.第一名.學院系所+",成績:"+比賽結果.第一名.成績+ "\r\n" + 
+      "第二名:"+比賽結果.第二名.隊伍+",學院系所:"+比賽結果.第二名.學院系所+",成績:"+比賽結果.第二名.成績+ "\r\n" +
+      "第三名:"+比賽結果.第三名.隊伍+",學院系所:"+比賽結果.第三名.學院系所+",成績:"+比賽結果.第三名.成績+ "\r\n";
+
+    
+      for (var i=1; i<games[gameIndex].隊數限制+1; i++){
+        var teamNumStr = "T"+i.toString();
+        var 隊伍標頭Str = 比賽結果.隊伍[teamNumStr].學院系所;
+        var 隊伍標頭Arr = 隊伍標頭Str.split(/[:,]+/);
+
+        var 第幾隊 = "第 "+i.toString()+" 隊";
+        var 隊伍學院系所 = 隊伍標頭Arr[1]+" - "+隊伍標頭Arr[3];
+        
+        strToSave += (第幾隊 + "," + 隊伍學院系所);  
+
+        var 隊伍人數 = Object.keys(比賽結果.隊伍[teamNumStr].報名者).length;
+        //console.log(隊伍人數);
+        var 隊伍報名="";
+        for (var j=1; j< 隊伍人數+1; j++){
+          var 隊伍報名Str = 比賽結果.隊伍[teamNumStr].報名者["No"+j.toString()];
+          console.log(隊伍報名Str);
+          隊伍報名 += (
+             "," + 隊伍報名Str.運動 + ":" + 
+            ((隊伍報名Str.姓名=="")?"尚未報名":隊伍報名Str.姓名) + "," + 隊伍報名Str.成績);
+        }  
+
+        strToSave += 隊伍報名 + "\r\n";
+      }        
   }
 
   var blob = new Blob([strToSave], {type: "text/plain;charset=utf-8"});
-  saveAs(blob, str+"export.txt")
+  saveAs(blob, filenamePreStr+"_export.txt")
   
 }
   
