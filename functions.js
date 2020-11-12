@@ -82,14 +82,14 @@ async function aaaPOST() {
 }
 // end of test session ======================
 
-$("#版本").text("V0.6");
+$("#版本").text("V0.65");
 
 // 初始變數
 var 已登入 = -1; // -1:未登入, 0:登入中, 1:已登入
 var 登入Email="";
 $("#帳號管理按鈕").prop("disabled","disabled");
 $("#院所系管理按鈕").prop("disabled","disabled");
-var 最後比賽編號; 
+var 最後比賽編號 = 0;; 
 var 比賽編號;
 var 目前比賽頁面; // 1:比賽資訊, 2:報名名單, 3:比賽結果
 var games, gamehistory, 所有學院=[["無"]];
@@ -104,7 +104,9 @@ var 比賽編號位數=5;
 
 initializaData();
 
+var myUser;
 firebase.auth().onAuthStateChanged(async function(user) {
+  myUser=user;
   if (user) {
     console.log("User is signed in.", user.email);
       
@@ -415,6 +417,12 @@ function initializaData(){
       field: "比賽名稱",
       title: " ",
       template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-info-circle'></i></div>",
+      width:"50px",        
+    },                  
+    {
+      field: "比賽名稱",
+      title: " ",
+      template: "<div onclick='infoClick(this)'><i style='font-size:20px' class='fa fa-trash-o'></i></div>",
       width:"50px",        
     }
   ];
@@ -1249,7 +1257,7 @@ function ExportClick(index) {
   }
 
   var blob = new Blob([strToSave], {type: "text/plain;charset=utf-8"});
-  saveAs(blob, filenamePreStr+"_export.txt")
+  saveAs(blob, filenamePreStr+"_export.csv")
   
 }
   
@@ -1612,12 +1620,12 @@ async function get現行比賽() {
       games[i].比賽編號 = heading0s+games[i].比賽編號.toString();
     }    
     
-    //find 最後比賽編號
-    最後比賽編號 = -1; 
+    //最後比賽編號 = 0;     
+    //find 最後比賽編號 in 現行比賽
     for (var i=0; i< games.length; i++){    
       if ( parseInt(games[i].比賽編號) > 最後比賽編號) 最後比賽編號 = parseInt(games[i].比賽編號);
     }
-    
+      
     $("#現行比賽表格").data("kendoGrid").dataSource.success(games);
 
     $.loading.end();
@@ -1666,6 +1674,12 @@ async function get過往比賽() {
   .then(function () {
     // always executed
   });
+  
+  // find 最後比賽編號 in 過往比賽
+  for (var i=0; i< gamehistory.length; i++){    
+    if ( parseInt(gamehistory[i].比賽編號) > 最後比賽編號) 最後比賽編號 = parseInt(gamehistory[i].比賽編號);
+  }
+
   
   console.log("get過往比賽 is done");
   $.loading.end();
