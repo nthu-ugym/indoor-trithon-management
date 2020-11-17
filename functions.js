@@ -1607,7 +1607,8 @@ async function get現行比賽() {
   await axios.get('https://ugymtriathlon.azurewebsites.net/api/GetAllActiveGameStatus?Code='+APIKEY)
   .then(function (response) {
     // handle success
-    games = JSON.parse(response.data);
+//    games = JSON.parse(response.data);
+    games = response.data;
     
     //$("#現行比賽表格").data("kendoGrid").dataSource.success(games);
 
